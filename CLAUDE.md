@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ γ-0 完了反映)
+最終更新: 2026-06-28 (フェーズ γ-1 完了反映)
 
 ---
 
@@ -98,7 +98,10 @@ WinForms 占いアプリ本体。実体のあるコード。
 | [FirstWindow.cs](Birthdate-Constella-Divination/FirstWindow.cs) | 51 | 入力画面ロジック (旧 Form1.cs、β-0 でリネーム) |
 | [FirstWindow.Designer.cs](Birthdate-Constella-Divination/FirstWindow.Designer.cs) | 167 | 自動生成 |
 | [FirstWindow.resx](Birthdate-Constella-Divination/FirstWindow.resx) | 119 | リソース (旧 Form1.resx、β-0 でリネーム) |
-| [Result.cs](Birthdate-Constella-Divination/Result.cs) | 290 | 結果計算・表示ロジック (本リポジトリで最大の手書きクラス) |
+| [Result.cs](Birthdate-Constella-Divination/Result.cs) | 290 | 結果計算・表示ロジック (γ-3 で薄 UI 層に refactor 予定) |
+| [Fortune/FortuneConstants.cs](Birthdate-Constella-Divination/Fortune/FortuneConstants.cs) | 36 | マジック定数 23 項目を集約 (γ-1 新設) |
+| [Fortune/Fortune.cs](Birthdate-Constella-Divination/Fortune/Fortune.cs) | 16 | 6 スコアを束ねる record (γ-1 新設、`MaxScoreCount`/`IsSuperLucky` を提供) |
+| [Fortune/FortuneCalculator.cs](Birthdate-Constella-Divination/Fortune/FortuneCalculator.cs) | 70 | 純粋計算 (誕生日差→6桁抽出→スコア算出→ゼロ補正) (γ-1 新設、`Calculate(int birthdate, DateTime today, Random rng)`) |
 | [Result.Designer.cs](Birthdate-Constella-Divination/Result.Designer.cs) | 346 | 自動生成 |
 | [Result.resx](Birthdate-Constella-Divination/Result.resx) | 119 | リソース |
 | [Properties/AssemblyInfo.cs](Birthdate-Constella-Divination/Properties/AssemblyInfo.cs) | 37 | アセンブリ属性 |
@@ -281,7 +284,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: γ 進行中 (γ-0 完了)。残りサブフェーズ: γ-1 (FortuneCalculator 抽出 + 定数集約)、γ-2 (LuckRank / LuckyItem 抽出 + 36 メッセージ)、γ-3 (Result.cs 薄 UI 化 + 静的フィールド除去)、γ-4 (BirthdateParser 入力検証)、γ-5 (NRT 有効化、γ 終結)。
+**現フェーズ**: γ 進行中 (γ-0, γ-1 完了)。残りサブフェーズ: γ-2 (LuckRank / LuckyItem 抽出 + 36 メッセージ)、γ-3 (Result.cs 薄 UI 化 + 静的フィールド除去)、γ-4 (BirthdateParser 入力検証)、γ-5 (NRT 有効化、γ 終結)。
 
 ---
 
@@ -305,7 +308,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | フェーズ β-0: `Form1.cs`/`.Designer.cs`/`.resx` を `FirstWindow.*` に `git mv` でリネーム (履歴保持)、csproj の `<Compile>`/`<EmbeddedResource>`/`<DependentUpon>` 5 箇所更新、Designer の `this.Name = "firstWindow"` を `"FirstWindow"` に修正、CLAUDE.md §4/§5/§8/§9/§10 更新 | `5b6bc1f` |
 | 2026-06-28 | フェーズ β-1: csproj 死設定 31 項目を一括除去 (旧 Scc バインディング×4、ClickOnce 23 項目、`ManifestCertificateThumbprint`/`CodeAnalysisRuleSet`/`ToolsVersion`/`NuGetPackageImportStamp`/`TargetFrameworkProfile`/`ManifestKeyFile`)。細分化された PropertyGroup を統合し 161 行 → 115 行に圧縮。**`MSB3327` 警告が解消**し α 以降初の警告 0 ビルド達成 | `32c1151` |
 | 2026-06-28 | フェーズ β-2: [BuildProcessTemplates/](https://github.com/OutRose/Divination2026) (TFS 11 系 XAML テンプレート 4 件、計 1,508 行、完全未参照確認済み) を `git rm -r` でディレクトリごと削除。CLAUDE.md §1/§4/§8/§9/§10、付録 A 項目 5 更新 (項目 5 解消)。**フェーズ β 完了** | `05efb8c` |
-| 2026-06-28 | フェーズ γ-0: [Birthdate-Constella-Divination.Tests/](Birthdate-Constella-Divination.Tests/) を SDK-style + xUnit 2.6.6 + Microsoft.NET.Test.Sdk 17.8.0 で新設、.slnx にプロジェクト追加、SanityTests.cs に 2 件のスモークテスト (両方合格)、.gitignore に `[Tt]est[Rr]esults/` 追加、CLAUDE.md §3/§4/§8/§9/§10 更新 | (本作業) |
+| 2026-06-28 | フェーズ γ-0: [Birthdate-Constella-Divination.Tests/](Birthdate-Constella-Divination.Tests/) を SDK-style + xUnit 2.6.6 + Microsoft.NET.Test.Sdk 17.8.0 で新設、.slnx にプロジェクト追加、SanityTests.cs に 2 件のスモークテスト (両方合格)、.gitignore に `[Tt]est[Rr]esults/` 追加、CLAUDE.md §3/§4/§8/§9/§10 更新 | `a2445ca` |
+| 2026-06-28 | フェーズ γ-1: [Fortune/](Birthdate-Constella-Divination/Fortune/) フォルダ新設 (`BirthdateConstellaDivination.Fortune` 名前空間)、`FortuneConstants` (23 定数)、`Fortune` (record 型 6 スコア)、`FortuneCalculator` (純粋計算 + ゼロ補正) を抽出。テスト 17 件追加 (`FortuneTests` 10 件 + `FortuneCalculatorTests` 7 件)、全 19/19 合格 | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -399,6 +403,25 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - 付録 A 項目 5 (`BuildProcessTemplates/` の扱い) を解決済みに
 - ビルド検証: Debug|AnyCPU で**エラー 0、警告 0** で成功 (コード/csproj に影響なし)
 - 関連コミット: `05efb8c`
+
+### 2026-06-28 (フェーズ γ-1: FortuneCalculator 抽出とマジック定数集約)
+- 新フォルダ [Birthdate-Constella-Divination/Fortune/](Birthdate-Constella-Divination/Fortune/) を作成 (`BirthdateConstellaDivination.Fortune` 名前空間)
+- 新規ファイル 3 件:
+  - [FortuneConstants.cs](Birthdate-Constella-Divination/Fortune/FortuneConstants.cs) — マジック定数 23 項目を集約 (`MaxScore=27`, `DigitCount=6`, `RandomKey/LifeAdjustment/ZeroAdjustment` の Min/MaxExclusive、6 ゼロ補正シード、ランク境界 6 つ、`LuckyItem` 境界、`SuperLuckyThreshold=3` 等)
+  - [Fortune.cs](Birthdate-Constella-Divination/Fortune/Fortune.cs) — `public sealed record Fortune(int Life, int Gold, int Study, int Love, int Work, int Pattern)` に `MaxScoreCount` / `IsSuperLucky` を持たせる (`IsExternalInit` polyfill 経由で record 型が使える)
+  - [FortuneCalculator.cs](Birthdate-Constella-Divination/Fortune/FortuneCalculator.cs) — `Calculate(int birthdateYyyyMmDd, DateTime today, Random rng) → Fortune` の純粋計算。`Random` 注入でテスト時にシード固定可能。ゼロ補正は private `ZeroAdjust(score, seed)` に分離 (元実装の決定論的挙動を保存)
+- **元実装の挙動を完全に保存**:
+  - `> 27` キャップは pattern 側 (dead branch、原文ママ) — コメントで明記
+  - ゼロ補正シード `100/300/600/400/200/500` は元コード値そのまま
+  - `Random.Next` の max-exclusive 規約を定数名で明示 (`...MinInclusive` / `...MaxExclusive`)
+- main csproj の `<ItemGroup>` に 3 ファイル分の `<Compile Include="Fortune\...">` を追加
+- テストプロジェクトに [Fortune/](Birthdate-Constella-Divination.Tests/Fortune/) サブフォルダ作成、新規テスト 2 ファイル:
+  - [FortuneTests.cs](Birthdate-Constella-Divination.Tests/Fortune/FortuneTests.cs) — `MaxScoreCount` / `IsSuperLucky` のパラメータ化テスト 9 件 + record 等価性 1 件
+  - [FortuneCalculatorTests.cs](Birthdate-Constella-Divination.Tests/Fortune/FortuneCalculatorTests.cs) — characterization テスト (誕生日==今日のゼロ補正、既知入力での期待値計算、null rng 例外、3 入力での >=1 不変量、決定論性) 計 7 件
+- 既存 [Result.cs](Birthdate-Constella-Divination/Result.cs) は**変更なし** (新型と並走状態。γ-3 で UI 層に refactor 時に呼び出す)
+- CLAUDE.md §4.1 (ファイル表に新ファイル群追加)、§8 (現フェーズ表示)、§9/§10 (履歴) 更新、γ-0 ハッシュ `a2445ca` 補填
+- 検証: `dotnet test` で **19/19 合格** (γ-0 の 2 + γ-1 の 17)、.slnx 経由 MSBuild で両プロジェクト警告 0
+- 関連コミット: (未コミット)
 
 ### 2026-06-28 (フェーズ γ-0: xUnit テストプロジェクト雛形を新設)
 - 新ディレクトリ [Birthdate-Constella-Divination.Tests/](Birthdate-Constella-Divination.Tests/) を作成

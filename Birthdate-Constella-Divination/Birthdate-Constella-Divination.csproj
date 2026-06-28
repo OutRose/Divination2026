@@ -59,6 +59,9 @@
     <Compile Include="FirstWindow.Designer.cs">
       <DependentUpon>FirstWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="Fortune\Fortune.cs" />
+    <Compile Include="Fortune\FortuneCalculator.cs" />
+    <Compile Include="Fortune\FortuneConstants.cs" />
     <Compile Include="Polyfills\IsExternalInit.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
