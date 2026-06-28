@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ α-3 完了反映)
+最終更新: 2026-06-28 (フェーズ α-4 完了反映 — フェーズ α 完全終了)
 
 ---
 
@@ -260,7 +260,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: α (α-0 〜 α-3 まで完了。残作業は付録 A の項目 5/6/8/9 のうち α 範囲のもの、またはフェーズ β への移行) 。
+**現フェーズ**: α 完了 (α-0 〜 α-4)。次はフェーズ β。残課題は付録 A の項目 5 (BuildProcessTemplates) / 6 (テスト不在) / 8 (ManifestCertificateThumbprint) のみで、すべて β/γ 範囲。
 
 ---
 
@@ -279,7 +279,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | フェーズ α-0: `LangVersion` を `8.0` → `latest` (C# 12.0) に変更、[Polyfills/IsExternalInit.cs](Birthdate-Constella-Divination/Polyfills/IsExternalInit.cs) を新設 (record 型 / init 専用プロパティ対応)、CLAUDE.md §3/§6 更新 | `7ef8a2a` |
 | 2026-06-28 | フェーズ α-1: 3 XML 設定に UTF-8 BOM 追加、[.gitattributes](.gitattributes) 導入 (code=CRLF / md=LF)、旧署名資産削除 (Key-First/Second snk + 一時 pfx)、csproj から BootstrapperPackage と死参照を除去、CLAUDE.md §2/§4/§9/§10/付録 A 更新 | `751f27a` |
 | 2026-06-28 | フェーズ α-2: [.gitignore](.gitignore) 新設、追跡済みビルド成果物 25 件 (bin/×3 + obj/×14 + .vs/×8 [root と csproj 配下のネスト両方] + csproj.user×1) を `git rm --cached` で untrack、CLAUDE.md §10/付録 A 更新 | `c23908a` |
-| 2026-06-28 | フェーズ α-3: [.editorconfig](.editorconfig) 最小版を新設 (encoding / EOL / indent / Allman ブレース)、csproj 既存 `<None Include=".editorconfig" />` の死参照を実体化、CLAUDE.md §10/付録 A 更新 | (本作業) |
+| 2026-06-28 | フェーズ α-3: [.editorconfig](.editorconfig) 最小版を新設 (encoding / EOL / indent / Allman ブレース)、csproj 既存 `<None Include=".editorconfig" />` の死参照を実体化、CLAUDE.md §10/付録 A 更新 | `4d8a6a6` |
+| 2026-06-28 | フェーズ α-4: `git add --renormalize .` で 19 ファイルの EOL を `.gitattributes` 規則どおりに blob 正規化、α-2 で見逃していた `*.csproj.vspscc` を untrack、CLAUDE.md §8/§10/付録 A 更新 (フェーズ α 完了) | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -331,7 +332,19 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - csproj に既存していた `<None Include=".editorconfig" />` 参照が、実体ファイルの追加により**整合**した (削除ではなく実体化を選択)
 - CLAUDE.md §10 (履歴)、付録 A 項目 2 (`.editorconfig` 整合: 解消) を更新
 - ビルド検証: Debug|AnyCPU でエラー 0、警告 1 (`MSB3327` のみ、`.editorconfig` 起因の新規警告なし) で成功
+- 関連コミット: `4d8a6a6`
+
+### 2026-06-28 (フェーズ α-4: 全面 EOL 再正規化とフェーズ α 終結)
+- `git add --renormalize .` を実行。事前チェック (`git ls-files` + `git check-attr eol` + blob の CR/LF カウント) で 9 ファイルの MISMATCH を特定したが、renormalize は連動して 19 ファイルの blob を `.gitattributes` の canonical 形 (CRLF 系 → LF blob、LF 系はそのまま) で書き直し
+- 内訳: `Form1.cs` / `Result.cs` / 各 `Designer.cs` / 各 `.resx` / `Properties/Settings.settings` / `Properties/AssemblyInfo.cs` / `Properties/app.manifest` / `BuildProcessTemplates/*.xaml` (4 件) / `README.md` / `DNS2018-InternalPattern.txt` ほか。**実体は変わらず、リポジトリ内の保存形式が canonical 化される**だけ (working tree は `.gitattributes` の `eol=` 指定どおり再生成される)
+- α-2 で見逃していた `Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj.vspscc` (1 件) を `git rm --cached` で untrack
+- CLAUDE.md §8 (現フェーズ表示: α 完了)、§10 (履歴)、付録 A 項目 9 (改行コード混在: 解消) を更新
+- ビルド検証: Debug|AnyCPU でエラー 0、警告 1 (`MSB3327` のみ) で成功
 - 関連コミット: (未コミット)
+
+---
+
+**フェーズ α 終了サマリ**: α-0 〜 α-4 で土台整備 (Modern C# 12.0 環境、エンコーディング・改行コードの統一とリポジトリ全面 canonical 化、旧資産整理、`.gitignore` / `.gitattributes` / `.editorconfig` の三点セット完備) が完了。これでフェーズ β (構造的クリーンアップ: `Form1` → `FirstWindow.cs` 名前整合、`ManifestCertificateThumbprint` 整理、`BuildProcessTemplates/` の扱い決定、`Result.cs` 290 行の責務分割準備など) に着手できる状態。
 
 ### テンプレート
 ```
@@ -353,7 +366,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 6. **テスト不在**: 単体テストが 1 つもない。安全なリファクタリングのためにフェーズ γ で `Result.cs` の運勢計算ロジックを抽出した上でテスト追加を検討
 7. ~~**古い `BootstrapperPackage` 参照**~~ → **2026-06-28 解決**: フェーズ α-1 で csproj から ItemGroup 全体を除去
 8. **`ManifestCertificateThumbprint`** が csproj に残存 (`58F877BD260C5BCA09990E12F960174F2B89672A`): α-1 で削除した一時 pfx に紐づく死設定。`<GenerateManifests>false</GenerateManifests>` なので実害なし。フェーズ β で除去
-9. **既存ファイルの改行コード混在**: `.gitattributes` 導入後も既存トラッキング済みファイルは即座には正規化されない。フェーズ α-1 では強制再正規化 (`git add --renormalize .`) を実施せず、自然な編集による収束を選択。フェーズ β で全面再正規化を実施するか判断
+9. ~~**既存ファイルの改行コード混在**~~ → **2026-06-28 解決**: フェーズ α-4 で `git add --renormalize .` を実行し全面 canonical 化。実体は変わらず、blob と attributes が完全整合した状態
 
 ## 付録 B: ビルド再現手順 (MSBuild パスの自動検出)
 
