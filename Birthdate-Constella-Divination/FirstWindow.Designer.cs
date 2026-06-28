@@ -143,7 +143,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.inputBirth);
             this.Controls.Add(this.label1);
-            this.Name = "firstWindow";
+            this.Name = "FirstWindow";
             this.Text = "Birthday Divination";
             this.ResumeLayout(false);
             this.PerformLayout();

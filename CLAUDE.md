@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ α-4 完了反映 — フェーズ α 完全終了)
+最終更新: 2026-06-28 (フェーズ β-0 完了反映)
 
 ---
 
@@ -84,9 +84,9 @@ WinForms 占いアプリ本体。実体のあるコード。
 | ファイル | 行数 | 種別 |
 |---|---:|---|
 | [Program.cs](Birthdate-Constella-Divination/Program.cs) | 19 | エントリポイント |
-| [Form1.cs](Birthdate-Constella-Divination/Form1.cs) (`FirstWindow`) | 51 | 入力画面ロジック |
-| [Form1.Designer.cs](Birthdate-Constella-Divination/Form1.Designer.cs) | 167 | 自動生成 |
-| [Form1.resx](Birthdate-Constella-Divination/Form1.resx) | 119 | リソース |
+| [FirstWindow.cs](Birthdate-Constella-Divination/FirstWindow.cs) | 51 | 入力画面ロジック (旧 Form1.cs、β-0 でリネーム) |
+| [FirstWindow.Designer.cs](Birthdate-Constella-Divination/FirstWindow.Designer.cs) | 167 | 自動生成 |
+| [FirstWindow.resx](Birthdate-Constella-Divination/FirstWindow.resx) | 119 | リソース (旧 Form1.resx、β-0 でリネーム) |
 | [Result.cs](Birthdate-Constella-Divination/Result.cs) | 290 | 結果計算・表示ロジック (本リポジトリで最大の手書きクラス) |
 | [Result.Designer.cs](Birthdate-Constella-Divination/Result.Designer.cs) | 346 | 自動生成 |
 | [Result.resx](Birthdate-Constella-Divination/Result.resx) | 119 | リソース |
@@ -144,7 +144,7 @@ C# 標準慣例に従う。
 | ファイル名 | クラス名と一致 (PascalCase) | `Result.cs` |
 
 ### 既存コードの揺れ
-- `Form1.cs` 内のクラス名は `FirstWindow` だが、ファイル名・Designer は `Form1.*` のまま。**フェーズ γ 以降でファイル名統一を検討**。
+- ~~`Form1.cs` 内のクラス名は `FirstWindow` だが、ファイル名・Designer は `Form1.*` のまま~~ → **フェーズ β-0 で解消** (`Form1.*` → `FirstWindow.*`、Designer の `this.Name` も `"firstWindow"` → `"FirstWindow"` に統一)。
 - Designer 自動生成側の命名 (`button1`, `label1` 等の連番) は WinForms デザイナの仕様。手で書き換える際は意味のある名前に置換する。
 
 ---
@@ -260,7 +260,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: α 完了 (α-0 〜 α-4)。次はフェーズ β。残課題は付録 A の項目 5 (BuildProcessTemplates) / 6 (テスト不在) / 8 (ManifestCertificateThumbprint) のみで、すべて β/γ 範囲。
+**現フェーズ**: β 進行中 (β-0 完了)。β-1 (csproj 死設定一掃) と β-2 (BuildProcessTemplates/ 削除) が次。
 
 ---
 
@@ -280,7 +280,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | フェーズ α-1: 3 XML 設定に UTF-8 BOM 追加、[.gitattributes](.gitattributes) 導入 (code=CRLF / md=LF)、旧署名資産削除 (Key-First/Second snk + 一時 pfx)、csproj から BootstrapperPackage と死参照を除去、CLAUDE.md §2/§4/§9/§10/付録 A 更新 | `751f27a` |
 | 2026-06-28 | フェーズ α-2: [.gitignore](.gitignore) 新設、追跡済みビルド成果物 25 件 (bin/×3 + obj/×14 + .vs/×8 [root と csproj 配下のネスト両方] + csproj.user×1) を `git rm --cached` で untrack、CLAUDE.md §10/付録 A 更新 | `c23908a` |
 | 2026-06-28 | フェーズ α-3: [.editorconfig](.editorconfig) 最小版を新設 (encoding / EOL / indent / Allman ブレース)、csproj 既存 `<None Include=".editorconfig" />` の死参照を実体化、CLAUDE.md §10/付録 A 更新 | `4d8a6a6` |
-| 2026-06-28 | フェーズ α-4: `git add --renormalize .` で 19 ファイルの EOL を `.gitattributes` 規則どおりに blob 正規化、α-2 で見逃していた `*.csproj.vspscc` を untrack、CLAUDE.md §8/§10/付録 A 更新 (フェーズ α 完了) | (本作業) |
+| 2026-06-28 | フェーズ α-4: `git add --renormalize .` で 19 ファイルの EOL を `.gitattributes` 規則どおりに blob 正規化、α-2 で見逃していた `*.csproj.vspscc` を untrack、CLAUDE.md §8/§10/付録 A 更新 (フェーズ α 完了) | `d78b985` |
+| 2026-06-28 | フェーズ β-0: `Form1.cs`/`.Designer.cs`/`.resx` を `FirstWindow.*` に `git mv` でリネーム (履歴保持)、csproj の `<Compile>`/`<EmbeddedResource>`/`<DependentUpon>` 5 箇所更新、Designer の `this.Name = "firstWindow"` を `"FirstWindow"` に修正、CLAUDE.md §4/§5/§8/§9/§10 更新 | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -340,6 +341,17 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - α-2 で見逃していた `Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj.vspscc` (1 件) を `git rm --cached` で untrack
 - CLAUDE.md §8 (現フェーズ表示: α 完了)、§10 (履歴)、付録 A 項目 9 (改行コード混在: 解消) を更新
 - ビルド検証: Debug|AnyCPU でエラー 0、警告 1 (`MSB3327` のみ) で成功
+- 関連コミット: `d78b985`
+
+### 2026-06-28 (フェーズ β-0: Form1 → FirstWindow リネーム)
+- ファイルリネーム 3 件を `git mv` で実施 (履歴保持、rename detection が効く形):
+  - `Birthdate-Constella-Divination/Form1.cs` → [FirstWindow.cs](Birthdate-Constella-Divination/FirstWindow.cs)
+  - `Birthdate-Constella-Divination/Form1.Designer.cs` → [FirstWindow.Designer.cs](Birthdate-Constella-Divination/FirstWindow.Designer.cs)
+  - `Birthdate-Constella-Divination/Form1.resx` → [FirstWindow.resx](Birthdate-Constella-Divination/FirstWindow.resx)
+- csproj の参照 5 箇所を更新 (Compile×2, EmbeddedResource×1, DependentUpon×2)
+- [FirstWindow.Designer.cs](Birthdate-Constella-Divination/FirstWindow.Designer.cs) の `this.Name = "firstWindow"` を `"FirstWindow"` に修正 (Designer 自動生成のケース不一致を解消、クラス名・ファイル名と完全一致)
+- CLAUDE.md §4 (ファイル表)、§5 (揺れ note 解消)、§8 (現フェーズ表示: β-0)、§9/§10 (履歴) を更新
+- ビルド検証: 後述
 - 関連コミット: (未コミット)
 
 ---
