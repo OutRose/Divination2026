@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ γ-4 完了反映)
+最終更新: 2026-06-28 (フェーズ γ 全体完了反映)
 
 ---
 
@@ -11,7 +11,7 @@
 - **正体**: 8 年前（2018 年）の卒業制作的位置づけで作られた、誕生日・名前から運勢を占う Windows Forms アプリ「電脳祭2018 (DenNoSai2018) 」プロジェクトの**複製版**。オリジナルは `OutRose/Divination2018` 系統リポジトリ。
 - **本リポジトリの目的**: 当時のコード資産を題材に、**学習目的で段階的にリファクタリングを行う**こと。プロダクト機能を増やすことが主目的ではない。
 - **メインアプリ**: `Birthdate-Constella-Divination.exe` (Windows Forms, .NET Framework 4.8)。`FirstWindow` (入力フォーム) と `Result` (結果表示フォーム) の 2 画面構成。健康・金運・学業・恋愛・仕事・対人の 6 指標で運勢を算出し、ラッキーアイテムを提示する。
-- **本リポジトリの実体規模** (γ-4 時点): 手書きコード 約 430 行 (うち Fortune 配下に 8 ファイル約 275 行、Result.cs は 290→49 行に圧縮、FirstWindow.cs は 51→40 行)、Designer 自動生成 約 604 行、resx 約 354 行、csproj 121 行、テスト約 490 行 (100 件)。詳細は §4 を参照。
+- **本リポジトリの実体規模** (γ 完了時点): 手書きコード 約 430 行 (うち Fortune 配下に 8 ファイル約 275 行、Result.cs は 290→49 行に圧縮、FirstWindow.cs は 51→40 行)、Designer 自動生成 約 604 行、resx 約 354 行、csproj 122 行 (NRT 1 行追加)、テスト約 490 行 (100 件)。NRT 有効、警告 0、テスト 100/100 合格。詳細は §4 を参照。
 - **CLI/サーバ要素なし**: 純粋な WinForms クライアント。外部ネットワーク・DB アクセスなし。
 - **国際化**: 日本語固定 (UI 文字列、コメント、アセンブリ属性すべて日本語) 。多言語化の予定はない。
 
@@ -188,6 +188,14 @@ C# 標準慣例に従う。
 
 csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
+### Null 許容参照型 (NRT)
+
+メインプロジェクト (`Birthdate-Constella-Divination.csproj`) は `<Nullable>enable</Nullable>` 有効 (γ-5 で導入)。テストプロジェクトは γ-0 から有効。
+
+- **手書きコード**: 全て NRT 注釈済み (警告 0)。新規コードは null 許容参照型 (`string?`) を意識して書く
+- **Designer 自動生成コード**: `InitializeComponent()` 内で代入される WinForms フィールドは Roslyn が NRT 推論できるため**抑制不要**。Form/Resources/Settings の各 Designer.cs はそのまま警告 0
+- **既知の null フロー解析の限界**: .NET Framework 4.8 のリファレンスアセンブリは `string.IsNullOrEmpty([NotNullWhen(false)] string?)` 注釈を持たないため、`if (string.IsNullOrEmpty(text))` 後も text は null 扱い。回避策として `if (text is null or "")` パターンを使用 ([Fortune/BirthdateParser.cs](Birthdate-Constella-Divination/Fortune/BirthdateParser.cs) 参照)
+
 ### Polyfill 戦略
 
 [Birthdate-Constella-Divination/Polyfills/](Birthdate-Constella-Divination/Polyfills/) に、C# コンパイラが要求するが .NET Framework 4.8 ランタイムには存在しない型を `internal` として自前定義する。
@@ -202,7 +210,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 ### 積極的に使用する機能 (デフォルトで OK)
 
-- **null 許容参照型** (`#nullable enable`) — フェーズ γ で段階的に有効化
+- **null 許容参照型** (`#nullable enable`) — フェーズ γ-5 で有効化済み、警告 0
 - **`using` 宣言** (`using var x = ...;`)
 - **`switch` 式** (`x switch { ... }`)
 - **プロパティパターン** (`is { Length: > 0 }` 等)
@@ -291,7 +299,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: γ 進行中 (γ-0, γ-1, γ-2, γ-3, γ-4 完了)。残りサブフェーズ: γ-5 (NRT 有効化、γ 終結)。
+**現フェーズ**: **γ 完了** (γ-0〜γ-5 すべて完了、2026-06-28)。フェーズ δ (モダン化) は未着手 (ユーザ判断で一旦保留)。
 
 ---
 
@@ -319,7 +327,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | フェーズ γ-1: [Fortune/](Birthdate-Constella-Divination/Fortune/) フォルダ新設 (`BirthdateConstellaDivination.Fortune` 名前空間)、`FortuneConstants` (23 定数)、`Fortune` (record 型 6 スコア)、`FortuneCalculator` (純粋計算 + ゼロ補正) を抽出。テスト 17 件追加 (`FortuneTests` 10 件 + `FortuneCalculatorTests` 7 件)、全 19/19 合格 | `e232f5a` |
 | 2026-06-28 | フェーズ γ-2: 5 新型を Fortune/ に追加 (`LuckCategory`/`LuckRank` enum、`LuckRankClassifier` (`switch` 式 + 36 メッセージ dict)、`LuckyItem` enum、`LuckyItemSelector`)。テスト 51 件追加、全 70/70 合格 | `c3c183c` |
 | 2026-06-28 | フェーズ γ-3: [Result.cs](Birthdate-Constella-Divination/Result.cs) を 290 行 → 50 行に圧縮 (薄 UI 配線層化)。`Result.birtheight`/`strusrname` 静的フィールド廃止、コンストラクタ引数化 (`Result(string birth, string name)`)。FortuneCalculator + LuckRankClassifier + LuckyItemSelector を呼び出す `AssignScore` ヘルパで 6 指標を一様処理。Life>27 を `Math.Min(score, progress.Maximum)` でキャップし元実装の潜在 `ArgumentOutOfRangeException` バグも解消。70/70 テスト維持 | `41e6737` |
-| 2026-06-28 | フェーズ γ-4: [BirthdateParser.cs](Birthdate-Constella-Divination/Fortune/BirthdateParser.cs) を新設 (`TryParse` + `BirthdateError` enum + `DescribeError`)。FortuneCalculator のシグネチャを `Calculate(DateTime, DateTime, Random)` に変更し `ToYyyyMmDd` ヘルパ追加。Result コンストラクタを `Result(DateTime, string)` に契約変更し `int.Parse` を撤去。FirstWindow を early-return パターンに書き換え、入力検証を BirthdateParser に一元化 (空文字 / 8 桁以外 / 数字以外 / 無効日付の 4 エラーパス)。テスト 30 件追加 (BirthdateParserTests 22 件 + FortuneCalculatorTests シグネチャ更新)、全 100/100 合格 | (本作業) |
+| 2026-06-28 | フェーズ γ-4: [BirthdateParser.cs](Birthdate-Constella-Divination/Fortune/BirthdateParser.cs) を新設 (`TryParse` + `BirthdateError` enum + `DescribeError`)。FortuneCalculator のシグネチャを `Calculate(DateTime, DateTime, Random)` に変更し `ToYyyyMmDd` ヘルパ追加。Result コンストラクタを `Result(DateTime, string)` に契約変更し `int.Parse` を撤去。FirstWindow を early-return パターンに書き換え、入力検証を BirthdateParser に一元化 (空文字 / 8 桁以外 / 数字以外 / 無効日付の 4 エラーパス)。テスト 30 件追加 (BirthdateParserTests 22 件 + FortuneCalculatorTests シグネチャ更新)、全 100/100 合格 | `3e4bd9f` |
+| 2026-06-28 | フェーズ γ-5: メインプロジェクトに `<Nullable>enable</Nullable>` 追加 (NRT 有効化)。検出された 2 件の警告を解消: (1) [Fortune/BirthdateParser.cs](Birthdate-Constella-Divination/Fortune/BirthdateParser.cs) で `string text` → `string? text` (defensive null 受入) + `string.IsNullOrEmpty` → `text is null or ""` パターン (.NET Framework 4.8 のリファレンスアセンブリが `[NotNullWhen]` 注釈を持たないため、フロー解析を pattern で代用)、(2) [FirstWindow.cs](Birthdate-Constella-Divination/FirstWindow.cs) で `birthError.Value` → `birthError!.Value` (TryParse 契約を null-forgiving で表明)。Designer 自動生成 4 ファイルは `InitializeComponent()` 内代入を Roslyn が推論できるため**抑制不要で警告 0**。100/100 テスト合格を維持。**フェーズ γ 全体完了** | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -413,6 +422,26 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - 付録 A 項目 5 (`BuildProcessTemplates/` の扱い) を解決済みに
 - ビルド検証: Debug|AnyCPU で**エラー 0、警告 0** で成功 (コード/csproj に影響なし)
 - 関連コミット: `05efb8c`
+
+### 2026-06-28 (フェーズ γ-5: NRT 有効化、γ 全体終結)
+- [Birthdate-Constella-Divination.csproj](Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj) の共通 PropertyGroup に `<Nullable>enable</Nullable>` を 1 行追加 (122 行に増加)
+- 初回ビルドで検出された警告 **2 件のみ** — γ-0 で test プロジェクトを最初から `Nullable=enable` で開始し、γ-1〜γ-4 で純粋ドメインを切り出し済みだったため、本フェーズの修正範囲は極小:
+  - **CS8602** [Fortune/BirthdateParser.cs:25](Birthdate-Constella-Divination/Fortune/BirthdateParser.cs#L25): `string.IsNullOrEmpty(text)` 後の `text.Length` 参照
+  - **CS8629** [FirstWindow.cs:19](Birthdate-Constella-Divination/FirstWindow.cs#L19): `birthError.Value` (`BirthdateError?` の値型 unwrap)
+- 修正内容:
+  - **BirthdateParser**: `string text` → `string? text` (defensive に null 受入)、`if (string.IsNullOrEmpty(text))` → `if (text is null or "")` (パターンマッチで null フロー解析を有効化)
+  - **FirstWindow**: `birthError.Value` → `birthError!.Value` (TryParse の契約「false 時は error 必ず設定」を null-forgiving 演算子で表明、契約コメント追加)
+- **Designer 自動生成 4 ファイル** (FirstWindow.Designer.cs / Result.Designer.cs / Properties/Resources.Designer.cs / Properties/Settings.Designer.cs) は **0 警告**:
+  - WinForms フィールドは Designer コンストラクタ → `InitializeComponent()` 内で全部代入される構造になっていて、Roslyn の definite assignment 解析が認識する
+  - 仮定していた `<NoWarn>CS8618;CS8602</NoWarn>` や `#nullable disable` を**入れる必要がなかった**
+- 既知の限界として、.NET Framework 4.8 のリファレンスアセンブリは `string.IsNullOrEmpty([NotNullWhen(false)] string?)` の注釈を持たない。`is null or ""` パターン併用が本リポジトリの慣用回避策 (CLAUDE.md §6 「Null 許容参照型 (NRT)」節に記載)
+- CLAUDE.md §1 (実体規模)、§6 (「Null 許容参照型 (NRT)」節新設、積極使用機能リストで NRT を「有効化済み」に更新)、§8 (現フェーズ: **γ 完了**)、§9/§10 (履歴)、付録 A 項目 6 (テスト不在) 更新、γ-4 ハッシュ `3e4bd9f` 補填
+- 検証:
+  - `dotnet test`: **100/100 合格** (149 ms)
+  - .slnx 経由 MSBuild: **両プロジェクト警告 0**
+  - `git status` クリーン
+- γ-5 で plan 上「コレクション式 / target-typed new / `using` declaration の徹底適用」が任意項目だったが、γ-1〜γ-4 ですでに該当箇所では適用済みだったため**追加変更なし**
+- 関連コミット: (未コミット)
 
 ### 2026-06-28 (フェーズ γ-4: 誕生日入力検証を BirthdateParser に集約)
 - [Birthdate-Constella-Divination/Fortune/BirthdateParser.cs](Birthdate-Constella-Divination/Fortune/BirthdateParser.cs) を新設 (59 行):
@@ -534,6 +563,10 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 ---
 
+**フェーズ γ 終了サマリ**: γ-0 〜 γ-5 で内部品質向上が完了。xUnit テストプロジェクト新設 (γ-0) → Fortune ドメイン抽出 (γ-1: FortuneCalculator、γ-2: LuckRank/LuckyItem + 36 メッセージ集約) → Result.cs を 290→49 行の薄 UI 配線層に再構成 (γ-3、静的フィールド廃止) → BirthdateParser による入力検証の一元化 (γ-4、`int.Parse` 例外を `TryParse` + ユーザフレンドリーエラーに) → NRT 有効化 (γ-5、警告 0 達成)。最終成果: 手書きコード ~430 行 (うち Fortune/ 8 ファイル ~275 行)、テスト 100 件 全合格、警告 0、NRT 有効。`Result.cs` の責務分割・運勢計算ロジックの UI 分離・record 化 (Fortune)・マジック定数 23 項目の集約・エラーハンドリング整備・テスト追加すべて達成。残課題はフェーズ δ (モダン化) のみだが、本リポジトリ規模では実施意義が薄いためユーザ判断で保留中。
+
+---
+
 **フェーズ β 終了サマリ**: β-0 〜 β-2 で構造的クリーンアップが完了。クラス/ファイル名の不整合解消 (Form1 → FirstWindow)、csproj の死設定 31 項目除去、未使用ディレクトリ削除を達成。ビルドは警告 0 で安定。残課題はフェーズ γ (内部品質向上: `Result.cs` 290 行の責務分割、運勢計算ロジックの UI 分離、`record` 化、Magic Number の名前付き定数化、エラーハンドリング、テスト追加) のみ。
 
 ---
@@ -557,7 +590,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 3. ~~**`bin/` / `obj/` のリポジトリ追跡**~~ → **2026-06-28 解決**: フェーズ α-2 で [.gitignore](.gitignore) 導入と 25 件の `git rm --cached` untrack を実施。以後、ビルド成果物・`.vs/`・`*.user`・`.claude/` 等は `git status` に現れない
 4. ~~**古いキーファイルの扱い**~~ → **2026-06-28 解決**: フェーズ α-1 で Key-First/Second snk と一時 pfx を直接削除 (アーカイブブランチ退避は行わなかった)
 5. ~~**`BuildProcessTemplates/`** の扱い~~ → **2026-06-28 解決**: フェーズ β-2 で `git rm -r` でディレクトリごと完全削除。git 履歴には残るので必要時は `git log -- BuildProcessTemplates/` で参照可能
-6. **テスト不在**: 単体テストが 1 つもない。安全なリファクタリングのためにフェーズ γ で `Result.cs` の運勢計算ロジックを抽出した上でテスト追加を検討
+6. ~~**テスト不在**: 単体テストが 1 つもない。安全なリファクタリングのためにフェーズ γ で `Result.cs` の運勢計算ロジックを抽出した上でテスト追加を検討~~ → **2026-06-28 解決**: フェーズ γ-0 で xUnit テストプロジェクト雛形を新設、γ-1〜γ-4 で純粋ドメイン (Fortune/) のテスト 98 件追加。γ-5 完了時点で**全 100 テスト合格**、警告 0 のクリーンビルド達成
 7. ~~**古い `BootstrapperPackage` 参照**~~ → **2026-06-28 解決**: フェーズ α-1 で csproj から ItemGroup 全体を除去
 8. ~~**`ManifestCertificateThumbprint`** が csproj に残存~~ → **2026-06-28 解決**: フェーズ β-1 で `ManifestCertificateThumbprint` を含む ClickOnce/署名マニフェスト関連 5 項目 (`ManifestCertificateThumbprint` / `ManifestKeyFile` / `GenerateManifests` / `SignManifests` / `TargetZone`) を csproj から完全除去。これにより `MSB3327` 警告も解消
 9. ~~**既存ファイルの改行コード混在**~~ → **2026-06-28 解決**: フェーズ α-4 で `git add --renormalize .` を実行し全面 canonical 化。実体は変わらず、blob と attributes が完全整合した状態

@@ -15,8 +15,9 @@ namespace BirthdateConstellaDivination
         {
             if (!BirthdateParser.TryParse(inputBirth.Text, out var birthdate, out var birthError))
             {
+                // TryParse の契約: false を返すときは birthError が必ず設定されている
                 _ = MessageBox.Show(
-                    BirthdateParser.DescribeError(birthError.Value),
+                    BirthdateParser.DescribeError(birthError!.Value),
                     "エラー",
                     MessageBoxButtons.OK);
                 return;

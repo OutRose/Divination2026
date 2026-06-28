@@ -12,11 +12,11 @@ namespace BirthdateConstellaDivination.Fortune
 
     public static class BirthdateParser
     {
-        public static bool TryParse(string text, out DateTime date, out BirthdateError? error)
+        public static bool TryParse(string? text, out DateTime date, out BirthdateError? error)
         {
             date = default;
 
-            if (string.IsNullOrEmpty(text))
+            if (text is null or "")
             {
                 error = BirthdateError.Empty;
                 return false;
