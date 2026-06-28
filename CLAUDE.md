@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ α-1 完了反映)
+最終更新: 2026-06-28 (フェーズ α-2 完了反映)
 
 ---
 
@@ -277,7 +277,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-27 | リファクタリング前最終スナップショット | 3398f66 |
 | 2026-06-28 | CLAUDE.md 初版作成、ブランチ `refact-260628-alpha` を切る | (フェーズ α 初手) |
 | 2026-06-28 | フェーズ α-0: `LangVersion` を `8.0` → `latest` (C# 12.0) に変更、[Polyfills/IsExternalInit.cs](Birthdate-Constella-Divination/Polyfills/IsExternalInit.cs) を新設 (record 型 / init 専用プロパティ対応)、CLAUDE.md §3/§6 更新 | `7ef8a2a` |
-| 2026-06-28 | フェーズ α-1: 3 XML 設定に UTF-8 BOM 追加、[.gitattributes](.gitattributes) 導入 (code=CRLF / md=LF)、旧署名資産削除 (Key-First/Second snk + 一時 pfx)、csproj から BootstrapperPackage と死参照を除去、CLAUDE.md §2/§4/§9/§10/付録 A 更新 | (本作業) |
+| 2026-06-28 | フェーズ α-1: 3 XML 設定に UTF-8 BOM 追加、[.gitattributes](.gitattributes) 導入 (code=CRLF / md=LF)、旧署名資産削除 (Key-First/Second snk + 一時 pfx)、csproj から BootstrapperPackage と死参照を除去、CLAUDE.md §2/§4/§9/§10/付録 A 更新 | `751f27a` |
+| 2026-06-28 | フェーズ α-2: [.gitignore](.gitignore) 新設、追跡済みビルド成果物 25 件 (bin/×3 + obj/×14 + .vs/×8 [root と csproj 配下のネスト両方] + csproj.user×1) を `git rm --cached` で untrack、CLAUDE.md §10/付録 A 更新 | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -300,6 +301,18 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - csproj から削除ファイル 3 件への `<None Include>` 参照を除去
 - csproj から `BootstrapperPackage` ItemGroup を除去 (.NET 4.5.2 / 3.5 SP1 への古い ClickOnce 参照)
 - CLAUDE.md §2 (エンコーディング方針: 目標表を「決定事項」に書き換え)、§4 (キーファイル行を Third 1 件に集約)、§9 (Divination2018 変更点)、§10 (履歴)、付録 A (要決定事項 2/4/7: 解消) を更新
+- ビルド検証: Debug|AnyCPU でエラー 0、警告 1 (`MSB3327` のみ) で成功
+- 関連コミット: `751f27a`
+
+### 2026-06-28 (フェーズ α-2: .gitignore 導入とビルド成果物の untrack)
+- [.gitignore](.gitignore) をリポジトリルートに新設 (Visual Studio 標準テンプレート相当を本プロジェクト向けに整理: `[Bb]in/`, `[Oo]bj/`, `.vs/`, `*.user`, `*.suo`, `*.pfx`, `.claude/`, `.vscode/*` + 主要設定ファイルの例外 等)
+- 追跡済みビルド成果物・作業状態ファイル 25 件を `git rm --cached` で index から除去 (working tree は保持):
+  - `.vs/` 配下 4 件 (vsidx, suo, DocumentLayout×2)
+  - `Birthdate-Constella-Divination/.vs/` 配下 4 件 (**nested `.vs/`** — solution root と csproj root の両方に存在する歴史的経緯あり)
+  - `Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj.user` 1 件 (ユーザ固有)
+  - `Birthdate-Constella-Divination/bin/Debug/` 3 件 (`.exe`, `.exe.config`, `.pdb`)
+  - `Birthdate-Constella-Divination/obj/Debug/` 14 件 (`.NETFramework,Version=v4.8.AssemblyAttributes.cs`, 各種 `.cache`, 3 種の `.resources`, `TempPE/Properties.Resources.Designer.cs.dll`, exe/pdb の中間版 等)
+- CLAUDE.md §10 (履歴)、付録 A 項目 3 (`bin`/`obj` 追跡: 解消) を更新
 - ビルド検証: 後述
 - 関連コミット: (未コミット)
 
@@ -317,7 +330,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 1. ~~**C# LangVersion**: 7.3 にダウングレードするか、8.0 を維持するか~~ → **2026-06-28 解決**: `latest` (C# 12.0) + Polyfill 戦略を採用 (フェーズ α-0)
 2. ~~**`.gitattributes` / `.editorconfig` の導入可否**~~ → **2026-06-28 解決**: `.gitattributes` をフェーズ α-1 で導入 (code=CRLF / md=LF / binary 多数)。`.editorconfig` は csproj から `<None Include>` 参照のみ残るが実体未作成 → **フェーズ β で実体作成 or 参照削除**
-3. **`bin/` / `obj/` のリポジトリ追跡**: 過去のコミットには `bin/Debug/*.exe` 等がコミットされている。`.gitignore` 整備 — フェーズ β
+3. ~~**`bin/` / `obj/` のリポジトリ追跡**~~ → **2026-06-28 解決**: フェーズ α-2 で [.gitignore](.gitignore) 導入と 25 件の `git rm --cached` untrack を実施。以後、ビルド成果物・`.vs/`・`*.user`・`.claude/` 等は `git status` に現れない
 4. ~~**古いキーファイルの扱い**~~ → **2026-06-28 解決**: フェーズ α-1 で Key-First/Second snk と一時 pfx を直接削除 (アーカイブブランチ退避は行わなかった)
 5. **`BuildProcessTemplates/`** の扱い: 未使用 XAML 群を残すか削除するか — フェーズ β
 6. **テスト不在**: 単体テストが 1 つもない。安全なリファクタリングのためにフェーズ γ で `Result.cs` の運勢計算ロジックを抽出した上でテスト追加を検討

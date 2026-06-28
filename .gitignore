@@ -1,0 +1,81 @@
+# Divination2026 — what NOT to track
+# Established in phase α-2 (2026-06-28). See CLAUDE.md §2 / 付録A item 3.
+# Based on the Microsoft VisualStudio.gitignore template, trimmed to what this repo actually needs.
+
+# ---- Build output ----
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# ---- Visual Studio working directory ----
+.vs/
+
+# ---- Per-user / per-machine project state ----
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.userprefs
+*.vspscc
+*.vssscc
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+node_modules/
+
+# ---- MSBuild / SDK caches ----
+*.binlog
+*.pidb
+*.svclog
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+
+# ---- NuGet ----
+*.nupkg
+*.snupkg
+packages/
+!**/packages/build/
+**/packages/repositories.config
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ---- ReSharper / Rider ----
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+.idea/
+
+# ---- Backup / swap ----
+*.bak
+*.swp
+*~
+
+# ---- OS noise ----
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---- Claude Code working state ----
+# settings.local.json は端末固有。settings.json は将来チームで共有する場合に
+# 個別追跡を検討するが、現時点では allow-list の中身が個人作業ログに近いため
+# .claude/ ディレクトリごと除外する。
+.claude/
+
+# ---- VSCode workspace ----
+# settings.json / launch.json / tasks.json / extensions.json は共有してよい。
+# それ以外 (履歴 / ローカルキャッシュ) は無視する。
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
