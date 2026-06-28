@@ -1,0 +1,47 @@
+# Divination2026 — line-ending and binary policy
+# Established in phase α-1 (2026-06-28). See CLAUDE.md §2 for context.
+
+# Default: auto-detect text vs binary
+* text=auto
+
+# ---- Source / config: CRLF (Windows .NET convention) ----
+*.cs           text eol=crlf working-tree-encoding=UTF-8
+*.csproj       text eol=crlf working-tree-encoding=UTF-8
+*.sln          text eol=crlf working-tree-encoding=UTF-8
+*.slnx         text eol=crlf working-tree-encoding=UTF-8
+*.config       text eol=crlf working-tree-encoding=UTF-8
+*.resx         text eol=crlf working-tree-encoding=UTF-8
+*.settings     text eol=crlf working-tree-encoding=UTF-8
+*.manifest     text eol=crlf working-tree-encoding=UTF-8
+*.editorconfig text eol=crlf
+*.props        text eol=crlf working-tree-encoding=UTF-8
+*.targets      text eol=crlf working-tree-encoding=UTF-8
+*.xaml         text eol=crlf working-tree-encoding=UTF-8
+*.ruleset      text eol=crlf working-tree-encoding=UTF-8
+
+# ---- Documentation: LF (Markdown / Unix convention) ----
+*.md  text eol=lf
+*.txt text eol=lf
+
+# ---- Tooling files (these themselves) ----
+.gitattributes text eol=lf
+.gitignore     text eol=lf
+
+# ---- Binary: never normalize ----
+*.snk     binary
+*.pfx     binary
+*.exe     binary
+*.dll     binary
+*.pdb     binary
+*.suo     binary
+*.vsidx   binary
+*.nupkg   binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.bmp     binary
+*.zip     binary
+*.7z      binary
+*.cache   binary

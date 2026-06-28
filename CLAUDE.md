@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ α-0 完了反映)
+最終更新: 2026-06-28 (フェーズ α-1 完了反映)
 
 ---
 
@@ -19,31 +19,30 @@
 
 ## 2. ファイルエンコーディング方針
 
-### 目標
-**ソースコード関連ファイルは UTF-8 BOM 付き (EF BB BF) で統一する。**
+### 目標 (2026-06-28 確定)
 
-### 現状 (2026-06-28 時点)
-
-| 種類 | エンコーディング | 該当ファイル |
+| カテゴリ | エンコーディング | 改行コード |
 |---|---|---|
-| .cs / Designer.cs / AssemblyInfo.cs | UTF-8 BOM | すべて目標と一致 |
-| .csproj | UTF-8 BOM | 目標と一致 |
-| .resx | UTF-8 BOM | すべて目標と一致 |
-| .manifest (`Properties/app.manifest`) | UTF-8 BOM | 目標と一致 |
-| .settings (`Properties/Settings.settings`) | UTF-8 BOM | 目標と一致 |
-| **App.config** | ASCII (BOM なし) | **要検討**: XML 宣言が `encoding="utf-8"` 指定。BOM を付けるべきか保留 |
-| **packages.config** | ASCII (BOM なし、LF 改行) | 同上。Analyzer 削除後の現状は空 `<packages></packages>` |
-| **Birthdate-Constella-Divination.slnx** | ASCII (BOM なし) | Visual Studio 生成ファイル。ツールが BOM を剥がす可能性あり |
-| **README.md** | UTF-8 (BOM なし) | Markdown 慣例上 BOM なしが一般的。BOM 付与は要検討 |
+| コード関連 (.cs, .csproj, .sln, .slnx, .config, .resx, .settings, .manifest, .xaml, .props, .targets, .ruleset, .editorconfig) | **UTF-8 BOM** | **CRLF** |
+| ドキュメント (.md, .txt) | UTF-8 (BOM なし) | **LF** |
+| ツール設定 (`.gitattributes`, `.gitignore`) | UTF-8 (BOM なし) | **LF** |
+| バイナリ (.snk, .pfx, .exe, .dll, .pdb, .nupkg, 画像各種) | バイナリ扱い | 改行制御なし |
 
-### 改行コード
-- 大半のファイルが CRLF と LF の**混在状態**。`packages.config` のみ LF 統一。
-- 統一方針は未定 (フェーズ β で `.gitattributes` 導入時に決定) 。
+上記方針は [.gitattributes](.gitattributes) で機械的に強制されます (フェーズ α-1 で導入済み)。
+
+### 現状 (フェーズ α-1 完了時点)
+
+すべてのソースおよび設定ファイルが上記方針に**準拠済み**。
+
+- フェーズ α-1 で BOM を追加したファイル: [App.config](Birthdate-Constella-Divination/App.config), [packages.config](Birthdate-Constella-Divination/packages.config), [Birthdate-Constella-Divination.slnx](Birthdate-Constella-Divination.slnx)
+- README.md は Markdown 慣例どおり BOM なし UTF-8 を維持。
+- 改行コードは `.gitattributes` の `eol=crlf` / `eol=lf` で次回 checkout 時から自動正規化される。既存の混在状態は `git add --renormalize .` を別途実施するか、各ファイルを順次編集する中で解消する (フェーズ α-1 では強制再正規化は実施せず、自然な更新に任せる方針)。
 
 ### 運用ルール
-- 新規 .cs / .csproj / .resx を作成する際は **必ず UTF-8 BOM** で書き出す。
-- ツール (Visual Studio / dotnet CLI / Roslyn) が BOM を勝手に剥がさないか、コミット前に `git diff` で警戒する。
-- BOM 状態を機械的に保証するため、フェーズ β で `.gitattributes` (`*.cs text working-tree-encoding=UTF-8 eol=crlf`) と `.editorconfig` の導入を検討する。
+
+- 新規ファイル作成時、`.gitattributes` の規則に従って Visual Studio / Claude Code が適切な BOM・EOL で保存する。
+- BOM 付与は [PowerShell] [IO.File] API で先頭 3 バイト `EF BB BF` を直接書き込む方法が確実 (テキストエディタによっては BOM 付与オプションが分かりにくいため)。
+- ツール (Visual Studio / dotnet CLI / Roslyn) が BOM を勝手に剥がさないか、コミット前に `git diff` で警戒する。`.gitattributes` の `working-tree-encoding=UTF-8` 指定で Git レベルでは UTF-8 が維持される。
 
 ---
 
@@ -101,7 +100,7 @@ WinForms 占いアプリ本体。実体のあるコード。
 | [App.config](Birthdate-Constella-Divination/App.config) | 7 | アプリ構成 |
 | [packages.config](Birthdate-Constella-Divination/packages.config) | 2 | NuGet (現在空) |
 | [DNS2018-InternalPattern.txt](Birthdate-Constella-Divination/DNS2018-InternalPattern.txt) | — | 内部メモ (運用文書) |
-| `Key-FirstCompleted20180430.snk` / `Key-SecondCompleted20180504.snk` / [Key-ThirdCompleted20191105.snk](Birthdate-Constella-Divination/Key-ThirdCompleted20191105.snk) / `Birthdate-Constella-Divination_一時キー.pfx` | — | 強名前/署名キー (3 世代の履歴を保持) |
+| [Key-ThirdCompleted20191105.snk](Birthdate-Constella-Divination/Key-ThirdCompleted20191105.snk) | — | 強名前署名キー (現役)。α-1 で Key-First/Second と一時 pfx を削除して Third のみに集約 |
 
 C# ルート名前空間: `BirthdateConstellaDivination` (ハイフンなし) 。
 
@@ -277,7 +276,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-27 | `Microsoft.CodeAnalysis.FxCopAnalyzers` を削除 (リファクタリング前にノイズを除去) | 76e23f1 |
 | 2026-06-27 | リファクタリング前最終スナップショット | 3398f66 |
 | 2026-06-28 | CLAUDE.md 初版作成、ブランチ `refact-260628-alpha` を切る | (フェーズ α 初手) |
-| 2026-06-28 | フェーズ α-0: `LangVersion` を `8.0` → `latest` (C# 12.0) に変更、[Polyfills/IsExternalInit.cs](Birthdate-Constella-Divination/Polyfills/IsExternalInit.cs) を新設 (record 型 / init 専用プロパティ対応)、CLAUDE.md §3/§6 更新 | (本作業) |
+| 2026-06-28 | フェーズ α-0: `LangVersion` を `8.0` → `latest` (C# 12.0) に変更、[Polyfills/IsExternalInit.cs](Birthdate-Constella-Divination/Polyfills/IsExternalInit.cs) を新設 (record 型 / init 専用プロパティ対応)、CLAUDE.md §3/§6 更新 | `7ef8a2a` |
+| 2026-06-28 | フェーズ α-1: 3 XML 設定に UTF-8 BOM 追加、[.gitattributes](.gitattributes) 導入 (code=CRLF / md=LF)、旧署名資産削除 (Key-First/Second snk + 一時 pfx)、csproj から BootstrapperPackage と死参照を除去、CLAUDE.md §2/§4/§9/§10/付録 A 更新 | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -291,6 +291,16 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - csproj の `<ItemGroup>` に `<Compile Include="Polyfills\IsExternalInit.cs" />` を追加 (旧形式 csproj のため明示登録が必要)
 - CLAUDE.md §3 (ビルド環境表の C# 言語バージョン行)、§6 (コーディングスタイル全面書き換え)、§9 (Divination2018 からの変更点)、付録 A (要決定事項 1: 解消)、を更新
 - ビルド検証: Debug|AnyCPU でエラー 0、警告 1 (`MSB3327` のみ) で成功
+- 関連コミット: `7ef8a2a`
+
+### 2026-06-28 (フェーズ α-1: エンコーディング統一と旧資産整理)
+- 3 XML 設定ファイル ([App.config](Birthdate-Constella-Divination/App.config), [packages.config](Birthdate-Constella-Divination/packages.config), [Birthdate-Constella-Divination.slnx](Birthdate-Constella-Divination.slnx)) に UTF-8 BOM (`EF BB BF`) を PowerShell で in-place 追加 (改行コードは現状維持)
+- [.gitattributes](.gitattributes) をリポジトリルートに新設: コード関連 = CRLF + `working-tree-encoding=UTF-8`、md/txt = LF、`.snk` `.pfx` `.exe` 等 = binary
+- 旧署名資産 3 ファイルを `git rm` で削除: `Key-FirstCompleted20180430.snk`, `Key-SecondCompleted20180504.snk`, `Birthdate-Constella-Divination_一時キー.pfx` (アーカイブブランチ退避ではなく直接削除)
+- csproj から削除ファイル 3 件への `<None Include>` 参照を除去
+- csproj から `BootstrapperPackage` ItemGroup を除去 (.NET 4.5.2 / 3.5 SP1 への古い ClickOnce 参照)
+- CLAUDE.md §2 (エンコーディング方針: 目標表を「決定事項」に書き換え)、§4 (キーファイル行を Third 1 件に集約)、§9 (Divination2018 変更点)、§10 (履歴)、付録 A (要決定事項 2/4/7: 解消) を更新
+- ビルド検証: 後述
 - 関連コミット: (未コミット)
 
 ### テンプレート
@@ -306,13 +316,14 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 ## 付録 A: 既知の課題・要決定事項
 
 1. ~~**C# LangVersion**: 7.3 にダウングレードするか、8.0 を維持するか~~ → **2026-06-28 解決**: `latest` (C# 12.0) + Polyfill 戦略を採用 (フェーズ α-0)
-2. **`.gitattributes` / `.editorconfig` の導入可否**: 改行コードと BOM の機械的保証 — フェーズ β
-   - 注: csproj には `<None Include=".editorconfig" />` が登録されているがファイル自体は未作成。フェーズ β で実体を作るタイミングで整合させる
+2. ~~**`.gitattributes` / `.editorconfig` の導入可否**~~ → **2026-06-28 解決**: `.gitattributes` をフェーズ α-1 で導入 (code=CRLF / md=LF / binary 多数)。`.editorconfig` は csproj から `<None Include>` 参照のみ残るが実体未作成 → **フェーズ β で実体作成 or 参照削除**
 3. **`bin/` / `obj/` のリポジトリ追跡**: 過去のコミットには `bin/Debug/*.exe` 等がコミットされている。`.gitignore` 整備 — フェーズ β
-4. **古いキーファイルの扱い**: `Key-FirstCompleted20180430.snk`, `Key-SecondCompleted20180504.snk`, 一時 `.pfx` を残すか歴史的アーカイブとして別ブランチに退避するか — フェーズ β
+4. ~~**古いキーファイルの扱い**~~ → **2026-06-28 解決**: フェーズ α-1 で Key-First/Second snk と一時 pfx を直接削除 (アーカイブブランチ退避は行わなかった)
 5. **`BuildProcessTemplates/`** の扱い: 未使用 XAML 群を残すか削除するか — フェーズ β
 6. **テスト不在**: 単体テストが 1 つもない。安全なリファクタリングのためにフェーズ γ で `Result.cs` の運勢計算ロジックを抽出した上でテスト追加を検討
-7. **古い `BootstrapperPackage` 参照**: csproj 末尾に .NET Framework 4.5.2 / 3.5 SP1 への `BootstrapperPackage` が残る。ClickOnce ブートストラップ用だが、4.8 ターゲットには整合しない — フェーズ β で整理
+7. ~~**古い `BootstrapperPackage` 参照**~~ → **2026-06-28 解決**: フェーズ α-1 で csproj から ItemGroup 全体を除去
+8. **`ManifestCertificateThumbprint`** が csproj に残存 (`58F877BD260C5BCA09990E12F960174F2B89672A`): α-1 で削除した一時 pfx に紐づく死設定。`<GenerateManifests>false</GenerateManifests>` なので実害なし。フェーズ β で除去
+9. **既存ファイルの改行コード混在**: `.gitattributes` 導入後も既存トラッキング済みファイルは即座には正規化されない。フェーズ α-1 では強制再正規化 (`git add --renormalize .`) を実施せず、自然な編集による収束を選択。フェーズ β で全面再正規化を実施するか判断
 
 ## 付録 B: ビルド再現手順 (MSBuild パスの自動検出)
 
