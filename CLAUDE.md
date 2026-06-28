@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ β-0 完了反映)
+最終更新: 2026-06-28 (フェーズ β-1 完了反映)
 
 ---
 
@@ -59,11 +59,11 @@
 | ClickOnce | 有効 (証明書が無いため `MSB3327` 警告が出る — 動作には影響なし) |
 | ソリューション形式 | **`.slnx`** (新 XML 形式)。レガシーな `.sln` ではない |
 | 検証済み MSBuild | `C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe` (VS 18 Insiders) |
-| ビルド結果 (2026-06-28) | **成功** (エラー 0、警告 1: `MSB3327` のみ) |
+| ビルド結果 (2026-06-28、β-1 後) | **成功** (エラー 0、**警告 0**) — α-1〜β-1 で ClickOnce 関連設定を段階撤去した結果、`MSB3327` が解消 |
 
 ### 注意点
 - **C# 言語バージョンは `latest` (C# 12.0) を採用**: 2026-06-28 のフェーズ α-0 で `8.0` から `latest` に変更。.NET Framework 4.8 ランタイム上で最新言語機能を最大限活用する方針。ランタイム依存機能 (init 専用プロパティの `IsExternalInit` など) はリポジトリ内に polyfill 型を自前定義して対応する (§6 参照) 。
-- ClickOnce 警告 `MSB3327` は環境依存 (証明書未インストール) であり、リポジトリ側の問題ではない。
+- ~~ClickOnce 警告 `MSB3327`~~ → β-1 で ClickOnce 関連設定一式 (`GenerateManifests` / `SignManifests` / `PublishUrl` 等 23 項目) を csproj から完全撤去した結果、警告自体が出なくなった。今後 ClickOnce で配布する場合は Visual Studio の publish ウィザードから再設定する。
 - ビルドコマンド例 (PowerShell):
   ```
   & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" `
@@ -260,7 +260,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: β 進行中 (β-0 完了)。β-1 (csproj 死設定一掃) と β-2 (BuildProcessTemplates/ 削除) が次。
+**現フェーズ**: β 進行中 (β-0, β-1 完了)。残りは β-2 (BuildProcessTemplates/ 削除)。
 
 ---
 
@@ -281,7 +281,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | フェーズ α-2: [.gitignore](.gitignore) 新設、追跡済みビルド成果物 25 件 (bin/×3 + obj/×14 + .vs/×8 [root と csproj 配下のネスト両方] + csproj.user×1) を `git rm --cached` で untrack、CLAUDE.md §10/付録 A 更新 | `c23908a` |
 | 2026-06-28 | フェーズ α-3: [.editorconfig](.editorconfig) 最小版を新設 (encoding / EOL / indent / Allman ブレース)、csproj 既存 `<None Include=".editorconfig" />` の死参照を実体化、CLAUDE.md §10/付録 A 更新 | `4d8a6a6` |
 | 2026-06-28 | フェーズ α-4: `git add --renormalize .` で 19 ファイルの EOL を `.gitattributes` 規則どおりに blob 正規化、α-2 で見逃していた `*.csproj.vspscc` を untrack、CLAUDE.md §8/§10/付録 A 更新 (フェーズ α 完了) | `d78b985` |
-| 2026-06-28 | フェーズ β-0: `Form1.cs`/`.Designer.cs`/`.resx` を `FirstWindow.*` に `git mv` でリネーム (履歴保持)、csproj の `<Compile>`/`<EmbeddedResource>`/`<DependentUpon>` 5 箇所更新、Designer の `this.Name = "firstWindow"` を `"FirstWindow"` に修正、CLAUDE.md §4/§5/§8/§9/§10 更新 | (本作業) |
+| 2026-06-28 | フェーズ β-0: `Form1.cs`/`.Designer.cs`/`.resx` を `FirstWindow.*` に `git mv` でリネーム (履歴保持)、csproj の `<Compile>`/`<EmbeddedResource>`/`<DependentUpon>` 5 箇所更新、Designer の `this.Name = "firstWindow"` を `"FirstWindow"` に修正、CLAUDE.md §4/§5/§8/§9/§10 更新 | `5b6bc1f` |
+| 2026-06-28 | フェーズ β-1: csproj 死設定 31 項目を一括除去 (旧 Scc バインディング×4、ClickOnce 23 項目、`ManifestCertificateThumbprint`/`CodeAnalysisRuleSet`/`ToolsVersion`/`NuGetPackageImportStamp`/`TargetFrameworkProfile`/`ManifestKeyFile`)。細分化された PropertyGroup を統合し 161 行 → 115 行に圧縮。**`MSB3327` 警告が解消**し α 以降初の警告 0 ビルド達成 | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -351,7 +352,19 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - csproj の参照 5 箇所を更新 (Compile×2, EmbeddedResource×1, DependentUpon×2)
 - [FirstWindow.Designer.cs](Birthdate-Constella-Divination/FirstWindow.Designer.cs) の `this.Name = "firstWindow"` を `"FirstWindow"` に修正 (Designer 自動生成のケース不一致を解消、クラス名・ファイル名と完全一致)
 - CLAUDE.md §4 (ファイル表)、§5 (揺れ note 解消)、§8 (現フェーズ表示: β-0)、§9/§10 (履歴) を更新
-- ビルド検証: 後述
+- ビルド検証: Debug|AnyCPU でエラー 0、警告 1 (`MSB3327` のみ) で成功、smoke test ユーザ確認 OK
+- 関連コミット: `5b6bc1f`
+
+### 2026-06-28 (フェーズ β-1: csproj 死設定 31 項目を一括除去)
+- [Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj](Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj) から以下を完全除去:
+  - **死設定 8 項目**: `ToolsVersion="14.0"` 属性、Scc バインディング 4 件 (SccProjectName/LocalPath/AuxPath/Provider = SAK)、`NuGetPackageImportStamp` 空タグ、`TargetFrameworkProfile` 空タグ、`ManifestKeyFile` 空タグ、`ManifestCertificateThumbprint` (α-1 で削除した一時 pfx 紐付け)、`CodeAnalysisRuleSet` (死参照 `BasicDesignGuidelineRules.ruleset`)
+  - **ClickOnce 関連 23 項目**: `PublishUrl` (アクセス不能な学校サーバ `\\00esv1a002\実習室\...`)、`Install`、`InstallFrom`、`IsWebBootstrapper`、`UpdateEnabled`/`UpdateMode`/`UpdateInterval`/`UpdateIntervalUnits`/`UpdatePeriodically`/`UpdateRequired`、`MapFileExtensions`、`WebPage`、`AutorunEnabled`、`ApplicationRevision`、`ApplicationVersion`、`UseApplicationTrust`、`PublishWizardCompleted`、`BootstrapperEnabled`、`GenerateManifests`、`SignManifests`、`TargetZone`
+- 細分化されていた 7 つの単一プロパティ PropertyGroup を統合 (`ApplicationManifest` + `SignAssembly` + `AssemblyOriginatorKeyFile` を 1 PropertyGroup に集約)
+- csproj 行数: 161 → 115 (約 30% 削減)
+- **`MSB3327` 警告が解消**し、α 以降初の警告 0 ビルド達成
+- CLAUDE.md §3 (ビルド環境表、警告 0 反映)、§3 注意点 (`MSB3327` 解消マーク)、§8 (現フェーズ表示)、§9/§10 (履歴) 更新
+- 付録 A 項目 8 (`ManifestCertificateThumbprint`) を解決済みに
+- ビルド検証: Debug|AnyCPU で**エラー 0、警告 0** で成功
 - 関連コミット: (未コミット)
 
 ---
@@ -377,7 +390,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 5. **`BuildProcessTemplates/`** の扱い: 未使用 XAML 群を残すか削除するか — フェーズ β
 6. **テスト不在**: 単体テストが 1 つもない。安全なリファクタリングのためにフェーズ γ で `Result.cs` の運勢計算ロジックを抽出した上でテスト追加を検討
 7. ~~**古い `BootstrapperPackage` 参照**~~ → **2026-06-28 解決**: フェーズ α-1 で csproj から ItemGroup 全体を除去
-8. **`ManifestCertificateThumbprint`** が csproj に残存 (`58F877BD260C5BCA09990E12F960174F2B89672A`): α-1 で削除した一時 pfx に紐づく死設定。`<GenerateManifests>false</GenerateManifests>` なので実害なし。フェーズ β で除去
+8. ~~**`ManifestCertificateThumbprint`** が csproj に残存~~ → **2026-06-28 解決**: フェーズ β-1 で `ManifestCertificateThumbprint` を含む ClickOnce/署名マニフェスト関連 5 項目 (`ManifestCertificateThumbprint` / `ManifestKeyFile` / `GenerateManifests` / `SignManifests` / `TargetZone`) を csproj から完全除去。これにより `MSB3327` 警告も解消
 9. ~~**既存ファイルの改行コード混在**~~ → **2026-06-28 解決**: フェーズ α-4 で `git add --renormalize .` を実行し全面 canonical 化。実体は変わらず、blob と attributes が完全整合した状態
 
 ## 付録 B: ビルド再現手順 (MSBuild パスの自動検出)
