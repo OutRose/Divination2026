@@ -6,11 +6,10 @@ namespace BirthdateConstellaDivination
 {
     public partial class Result : Form
     {
-        public Result(string birthdateText, string userName)
+        public Result(DateTime birthdate, string userName)
         {
             InitializeComponent();
 
-            int birthdate = int.Parse(birthdateText);
             var fortune = FortuneCalculator.Calculate(birthdate, DateTime.Now, new Random());
 
             showName.Text = userName;

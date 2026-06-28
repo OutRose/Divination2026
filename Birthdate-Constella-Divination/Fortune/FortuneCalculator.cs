@@ -4,15 +4,14 @@ namespace BirthdateConstellaDivination.Fortune
 {
     public static class FortuneCalculator
     {
-        public static Fortune Calculate(int birthdateYyyyMmDd, DateTime today, Random rng)
+        public static Fortune Calculate(DateTime birthdate, DateTime today, Random rng)
         {
             if (rng is null)
             {
                 throw new ArgumentNullException(nameof(rng));
             }
 
-            int todayYyyyMmDd = int.Parse(today.ToString("yyyyMMdd"));
-            int calresult = todayYyyyMmDd - birthdateYyyyMmDd;
+            int calresult = ToYyyyMmDd(today) - ToYyyyMmDd(birthdate);
 
             int[] digits = new int[FortuneConstants.DigitCount];
             for (int i = 0; i < FortuneConstants.DigitCount; i++)
@@ -51,6 +50,8 @@ namespace BirthdateConstellaDivination.Fortune
                 Pattern: ZeroAdjust(pattern, FortuneConstants.ZeroPatternSeed)
             );
         }
+
+        private static int ToYyyyMmDd(DateTime d) => d.Year * 10000 + d.Month * 100 + d.Day;
 
         private static int ZeroAdjust(int score, int seed)
         {

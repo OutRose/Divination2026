@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BirthdateConstellaDivination.Fortune;
 using Xunit;
 
@@ -10,7 +10,7 @@ public sealed class FortuneCalculatorTests
     public void Calculate_BirthdateEqualsToday_AllScoresAreZeroAdjusted()
     {
         var today = new DateTime(2026, 6, 28);
-        int birth = 20260628;
+        var birth = new DateTime(2026, 6, 28);
 
         // 誕生日 == 今日 → calresult = 0 → 全 digit が 0 → 全スコアが 0 → すべてゼロ補正
         // (rng は使われるが、digits が全部 0 なので rdkey/lfadj の値に関係なくスコアは 0)
@@ -27,11 +27,11 @@ public sealed class FortuneCalculatorTests
     [Fact]
     public void Calculate_KnownInputs_ProducesExpectedScores()
     {
-        // birth=20020523, today=2026-06-28 → calresult = 20260628 - 20020523 = 240105
+        // birth=2002-05-23, today=2026-06-28 → calresult = 20260628 - 20020523 = 240105
         // digits (LSB first) = [5, 0, 1, 0, 4, 2]
         // digits[5]=2 (life)、digits[4]=4 (gold)、digits[3]=0 (study)、digits[2]=1 (love)、digits[1]=0 (work)、digits[0]=5 (pattern)
         var today = new DateTime(2026, 6, 28);
-        int birth = 20020523;
+        var birth = new DateTime(2002, 5, 23);
 
         // 期待値計算用に同じ seed の rng で rdkey/lfadj を取り出す
         var rng = new Random(42);
@@ -71,20 +71,21 @@ public sealed class FortuneCalculatorTests
     public void Calculate_NullRng_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            FortuneCalculator.Calculate(20020523, new DateTime(2026, 6, 28), null!));
+            FortuneCalculator.Calculate(new DateTime(2002, 5, 23), new DateTime(2026, 6, 28), null!));
     }
 
     [Theory]
-    [InlineData(20020523, 2026, 6, 28)]
-    [InlineData(19990101, 2026, 6, 28)]
-    [InlineData(20260101, 2026, 6, 28)]
-    public void Calculate_AllScoresAreStrictlyPositive(int birth, int year, int month, int day)
+    [InlineData(2002, 5, 23, 2026, 6, 28)]
+    [InlineData(1999, 1, 1, 2026, 6, 28)]
+    [InlineData(2026, 1, 1, 2026, 6, 28)]
+    public void Calculate_AllScoresAreStrictlyPositive(int by, int bm, int bd, int ty, int tm, int td)
     {
         // 元実装の不変量: ゼロ補正によりすべての最終スコアは >= 1。
         // 注: Life スコアの上限は MaxScore (27) を超えうる (例: 9×3×6=162)。
         // これは元実装の挙動 (Designer 側の ProgressBar.Maximum=27 と矛盾) を保存している。
         // 将来 γ または δ で Life キャップの是非を判断する。
-        var today = new DateTime(year, month, day);
+        var birth = new DateTime(by, bm, bd);
+        var today = new DateTime(ty, tm, td);
         var fortune = FortuneCalculator.Calculate(birth, today, new Random(42));
 
         Assert.True(fortune.Life >= FortuneConstants.MinScore);
@@ -99,7 +100,7 @@ public sealed class FortuneCalculatorTests
     public void Calculate_DeterministicWithSameSeed()
     {
         var today = new DateTime(2026, 6, 28);
-        int birth = 20020523;
+        var birth = new DateTime(2002, 5, 23);
 
         var a = FortuneCalculator.Calculate(birth, today, new Random(42));
         var b = FortuneCalculator.Calculate(birth, today, new Random(42));

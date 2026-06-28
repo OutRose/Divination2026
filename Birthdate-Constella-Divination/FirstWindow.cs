@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
+using BirthdateConstellaDivination.Fortune;
 
 namespace BirthdateConstellaDivination
 {
@@ -12,33 +13,23 @@ namespace BirthdateConstellaDivination
 
         private void StartFunction_Click(object sender, EventArgs e)
         {
-            bool birthOk;
-            if (inputBirth.Text == "")
+            if (!BirthdateParser.TryParse(inputBirth.Text, out var birthdate, out var birthError))
             {
-                _ = MessageBox.Show("誕生日を入力してください。", "エラー", MessageBoxButtons.OK);
-                birthOk = false;
-            }
-            else
-            {
-                birthOk = true;
+                _ = MessageBox.Show(
+                    BirthdateParser.DescribeError(birthError.Value),
+                    "エラー",
+                    MessageBoxButtons.OK);
+                return;
             }
 
-            bool nameOk;
-            if (inputName.Text == "")
+            if (string.IsNullOrEmpty(inputName.Text))
             {
                 _ = MessageBox.Show("名前を入力してください。", "エラー", MessageBoxButtons.OK);
-                nameOk = false;
-            }
-            else
-            {
-                nameOk = true;
+                return;
             }
 
-            if (birthOk && nameOk)
-            {
-                using Result f2 = new Result(inputBirth.Text, inputName.Text);
-                _ = f2.ShowDialog(this);
-            }
+            using Result f2 = new Result(birthdate, inputName.Text);
+            _ = f2.ShowDialog(this);
         }
 
         private void ButtonExit_Click(object sender, EventArgs e)
