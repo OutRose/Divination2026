@@ -23,7 +23,8 @@
 
 | カテゴリ | エンコーディング | 改行コード |
 |---|---|---|
-| コード関連 (.cs, .csproj, .sln, .slnx, .config, .resx, .settings, .manifest, .xaml, .props, .targets, .ruleset, .editorconfig) | **UTF-8 BOM** | **CRLF** |
+| コード関連 (.cs, .csproj, .sln, .config, .resx, .settings, .manifest, .xaml, .props, .targets, .ruleset, .editorconfig) | **UTF-8 BOM** | **CRLF** |
+| **.slnx** (例外) | **UTF-8 (BOM なし)** | **CRLF** |
 | ドキュメント (.md, .txt) | UTF-8 (BOM なし) | **LF** |
 | ツール設定 (`.gitattributes`, `.gitignore`) | UTF-8 (BOM なし) | **LF** |
 | バイナリ (.snk, .pfx, .exe, .dll, .pdb, .nupkg, 画像各種) | バイナリ扱い | 改行制御なし |
@@ -34,7 +35,7 @@
 
 すべてのソースおよび設定ファイルが上記方針に**準拠済み**。
 
-- フェーズ α-1 で BOM を追加したファイル: [App.config](Birthdate-Constella-Divination/App.config), [packages.config](Birthdate-Constella-Divination/packages.config), [Birthdate-Constella-Divination.slnx](Birthdate-Constella-Divination.slnx)
+- フェーズ α-1 で BOM を追加したファイル: [App.config](Birthdate-Constella-Divination/App.config), [packages.config](Birthdate-Constella-Divination/packages.config), [Birthdate-Constella-Divination.slnx](Birthdate-Constella-Divination.slnx) (※後者は γ-3 後の VS 18 Insiders アップグレード時に VS が BOM を剥がすため、no-BOM 例外として確定)
 - README.md は Markdown 慣例どおり BOM なし UTF-8 を維持。
 - 改行コードは `.gitattributes` の `eol=crlf` / `eol=lf` で次回 checkout 時から自動正規化される。既存の混在状態は `git add --renormalize .` を別途実施するか、各ファイルを順次編集する中で解消する (フェーズ α-1 では強制再正規化は実施せず、自然な更新に任せる方針)。
 
@@ -410,6 +411,15 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - 付録 A 項目 5 (`BuildProcessTemplates/` の扱い) を解決済みに
 - ビルド検証: Debug|AnyCPU で**エラー 0、警告 0** で成功 (コード/csproj に影響なし)
 - 関連コミット: `05efb8c`
+
+### 2026-06-28 (γ-3 直後: VS 18 Insiders 互換対応)
+- VS 18 Insiders がレガシー csproj スキーマを拒否してソリューションが開けない事象が発生
+- VS の「一方向のアップグレード」ダイアログで OK を選択 → 実際の csproj 変更は**なし** (backup 比較で identical)、`.slnx` の BOM 除去のみ
+- 副産物: `Backup/` と `UpgradeLog.htm` が生成 → [.gitignore](.gitignore) に追記して無視
+- `.slnx` の BOM 仕様変更: VS Insiders が保存のたびに BOM を剥がす挙動が確定したため、`.editorconfig` の `[*.slnx]` を別グループに切り出して `charset = utf-8` (no-BOM) に。CLAUDE.md §2 の方針表にも例外行を追加
+- ビルド + テスト維持 (70/70 合格、警告 0)
+- これは「フェーズ γ-3 後の environmental fix」であり、γ-3.5 等の正式サブフェーズではない
+- 関連コミット: (本作業)
 
 ### 2026-06-28 (フェーズ γ-3: Result.cs を薄 UI 層に再構成、静的フィールド除去)
 - [Result.cs](Birthdate-Constella-Divination/Result.cs) を全面書き換え:

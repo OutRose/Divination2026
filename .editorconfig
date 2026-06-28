@@ -42,6 +42,12 @@ csharp_new_line_before_members_in_object_initializers = true
 csharp_new_line_before_members_in_anonymous_types = true
 
 # MSBuild / config / resource / build files — UTF-8 BOM + 2-space indent (XML 慣例)
-[*.{csproj,sln,slnx,config,resx,settings,manifest,xaml,props,targets,ruleset}]
+[*.{csproj,sln,config,resx,settings,manifest,xaml,props,targets,ruleset}]
 charset = utf-8-bom
+indent_size = 2
+
+# .slnx は VS Insiders が保存時に BOM を強制的に剥がすため、no-BOM で扱う
+# (本リポジトリでも α-1 で一度 BOM を付けたが γ-3 後の VS アップグレードで削除された)
+[*.slnx]
+charset = utf-8
 indent_size = 2

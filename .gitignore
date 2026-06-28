@@ -9,6 +9,14 @@
 [Ll]ogs/
 [Tt]est[Rr]esults/
 
+# ---- VS Insiders upgrade dialog artifacts ----
+# (VS Insiders がレガシー csproj を扱う際に生成、本リポジトリの csproj はすでにクリーン
+# なので実害なくバックアップが残るだけ)
+Backup/
+Backup*/
+UpgradeLog*.htm
+_UpgradeReport_Files/
+
 # ---- Visual Studio working directory ----
 .vs/
 
