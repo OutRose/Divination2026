@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ γ-1 完了反映)
+最終更新: 2026-06-28 (フェーズ γ-2 完了反映)
 
 ---
 
@@ -102,6 +102,11 @@ WinForms 占いアプリ本体。実体のあるコード。
 | [Fortune/FortuneConstants.cs](Birthdate-Constella-Divination/Fortune/FortuneConstants.cs) | 36 | マジック定数 23 項目を集約 (γ-1 新設) |
 | [Fortune/Fortune.cs](Birthdate-Constella-Divination/Fortune/Fortune.cs) | 16 | 6 スコアを束ねる record (γ-1 新設、`MaxScoreCount`/`IsSuperLucky` を提供) |
 | [Fortune/FortuneCalculator.cs](Birthdate-Constella-Divination/Fortune/FortuneCalculator.cs) | 70 | 純粋計算 (誕生日差→6桁抽出→スコア算出→ゼロ補正) (γ-1 新設、`Calculate(int birthdate, DateTime today, Random rng)`) |
+| [Fortune/LuckCategory.cs](Birthdate-Constella-Divination/Fortune/LuckCategory.cs) | 12 | enum (Life/Gold/Study/Love/Work/Pattern) (γ-2 新設) |
+| [Fortune/LuckRank.cs](Birthdate-Constella-Divination/Fortune/LuckRank.cs) | 12 | enum (Worst/Low/Mid/MidHigh/High/Highest) (γ-2 新設) |
+| [Fortune/LuckRankClassifier.cs](Birthdate-Constella-Divination/Fortune/LuckRankClassifier.cs) | 78 | スコア→ランク分類 (`switch` 式) + 36 メッセージ `IReadOnlyDictionary<(LuckCategory,LuckRank), string>` (γ-2 新設) |
+| [Fortune/LuckyItem.cs](Birthdate-Constella-Divination/Fortune/LuckyItem.cs) | 10 | enum (Pearl/Globe/Charm/LeisureSheet) (γ-2 新設) |
+| [Fortune/LuckyItemSelector.cs](Birthdate-Constella-Divination/Fortune/LuckyItemSelector.cs) | 38 | `Select(int)` / `Select(Random)` / `GetName(item)` (γ-2 新設) |
 | [Result.Designer.cs](Birthdate-Constella-Divination/Result.Designer.cs) | 346 | 自動生成 |
 | [Result.resx](Birthdate-Constella-Divination/Result.resx) | 119 | リソース |
 | [Properties/AssemblyInfo.cs](Birthdate-Constella-Divination/Properties/AssemblyInfo.cs) | 37 | アセンブリ属性 |
@@ -284,7 +289,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: γ 進行中 (γ-0, γ-1 完了)。残りサブフェーズ: γ-2 (LuckRank / LuckyItem 抽出 + 36 メッセージ)、γ-3 (Result.cs 薄 UI 化 + 静的フィールド除去)、γ-4 (BirthdateParser 入力検証)、γ-5 (NRT 有効化、γ 終結)。
+**現フェーズ**: γ 進行中 (γ-0, γ-1, γ-2 完了)。残りサブフェーズ: γ-3 (Result.cs 薄 UI 化 + 静的フィールド除去)、γ-4 (BirthdateParser 入力検証)、γ-5 (NRT 有効化、γ 終結)。
 
 ---
 
@@ -309,7 +314,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | フェーズ β-1: csproj 死設定 31 項目を一括除去 (旧 Scc バインディング×4、ClickOnce 23 項目、`ManifestCertificateThumbprint`/`CodeAnalysisRuleSet`/`ToolsVersion`/`NuGetPackageImportStamp`/`TargetFrameworkProfile`/`ManifestKeyFile`)。細分化された PropertyGroup を統合し 161 行 → 115 行に圧縮。**`MSB3327` 警告が解消**し α 以降初の警告 0 ビルド達成 | `32c1151` |
 | 2026-06-28 | フェーズ β-2: [BuildProcessTemplates/](https://github.com/OutRose/Divination2026) (TFS 11 系 XAML テンプレート 4 件、計 1,508 行、完全未参照確認済み) を `git rm -r` でディレクトリごと削除。CLAUDE.md §1/§4/§8/§9/§10、付録 A 項目 5 更新 (項目 5 解消)。**フェーズ β 完了** | `05efb8c` |
 | 2026-06-28 | フェーズ γ-0: [Birthdate-Constella-Divination.Tests/](Birthdate-Constella-Divination.Tests/) を SDK-style + xUnit 2.6.6 + Microsoft.NET.Test.Sdk 17.8.0 で新設、.slnx にプロジェクト追加、SanityTests.cs に 2 件のスモークテスト (両方合格)、.gitignore に `[Tt]est[Rr]esults/` 追加、CLAUDE.md §3/§4/§8/§9/§10 更新 | `a2445ca` |
-| 2026-06-28 | フェーズ γ-1: [Fortune/](Birthdate-Constella-Divination/Fortune/) フォルダ新設 (`BirthdateConstellaDivination.Fortune` 名前空間)、`FortuneConstants` (23 定数)、`Fortune` (record 型 6 スコア)、`FortuneCalculator` (純粋計算 + ゼロ補正) を抽出。テスト 17 件追加 (`FortuneTests` 10 件 + `FortuneCalculatorTests` 7 件)、全 19/19 合格 | (本作業) |
+| 2026-06-28 | フェーズ γ-1: [Fortune/](Birthdate-Constella-Divination/Fortune/) フォルダ新設 (`BirthdateConstellaDivination.Fortune` 名前空間)、`FortuneConstants` (23 定数)、`Fortune` (record 型 6 スコア)、`FortuneCalculator` (純粋計算 + ゼロ補正) を抽出。テスト 17 件追加 (`FortuneTests` 10 件 + `FortuneCalculatorTests` 7 件)、全 19/19 合格 | `e232f5a` |
+| 2026-06-28 | フェーズ γ-2: 5 新型を Fortune/ に追加 (`LuckCategory`/`LuckRank` enum、`LuckRankClassifier` (`switch` 式 + 36 メッセージ dict)、`LuckyItem` enum、`LuckyItemSelector`)。テスト 51 件追加、全 70/70 合格 | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -403,6 +409,26 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - 付録 A 項目 5 (`BuildProcessTemplates/` の扱い) を解決済みに
 - ビルド検証: Debug|AnyCPU で**エラー 0、警告 0** で成功 (コード/csproj に影響なし)
 - 関連コミット: `05efb8c`
+
+### 2026-06-28 (フェーズ γ-2: LuckRank / LuckyItem 抽出と 36 メッセージ集約)
+- Fortune/ に新規ファイル 5 件:
+  - [LuckCategory.cs](Birthdate-Constella-Divination/Fortune/LuckCategory.cs): `enum { Life, Gold, Study, Love, Work, Pattern }`
+  - [LuckRank.cs](Birthdate-Constella-Divination/Fortune/LuckRank.cs): `enum { Worst, Low, Mid, MidHigh, High, Highest }` (6 段階)
+  - [LuckRankClassifier.cs](Birthdate-Constella-Divination/Fortune/LuckRankClassifier.cs): `Classify(int score)` を C# `switch` 式で 6 行に圧縮、`GetMessage(category, rank)` で 36 メッセージを tuple-key `IReadOnlyDictionary` 経由で返す。`GetMessageForScore` 便利メソッド
+  - [LuckyItem.cs](Birthdate-Constella-Divination/Fortune/LuckyItem.cs): `enum { Pearl, Globe, Charm, LeisureSheet }`
+  - [LuckyItemSelector.cs](Birthdate-Constella-Divination/Fortune/LuckyItemSelector.cs): `Select(int)` (純粋マッピング、out-of-range で例外)、`Select(Random)` (rng.Next ラッパ)、`GetName(item)` (日本語ラベル)
+- **元実装からの軽い refinement**:
+  - 元コードはランク分類が `if (0 <= s && s <= 4) ... else if ... else if (25 <= s && s <= 27)` で、`s > 27` や `s < 0` のとき label が初期文字列 (例: "解説1") に残る silent default だった
+  - 新 `Classify` は `switch` 式の `_` パターンで > RankHighMax を `Highest` にキャップ、負数は最初の `<= RankWorstMax` に落ちて `Worst` を返す → UI 表示の死分岐がなくなる
+  - 元のラッキーアイテムは `Random.Next(1, 10)` で 1〜9 を生成し、`8-10` の if-else 分岐に 10 がハマる前提だが実は到達不能だった。新 `Select(int)` は値 1-10 すべてを正しくマップし、out-of-range は例外
+  - これらは γ-3 で Result.cs を refactor したとき、Life>27 (max 162) を含む既知の挙動を「Highest メッセージ表示」で扱えるようになる
+- main csproj に 5 ファイル分の `<Compile Include="Fortune\...">` を追加
+- テストプロジェクトに新規 2 ファイル:
+  - [LuckRankClassifierTests.cs](Birthdate-Constella-Divination.Tests/Fortune/LuckRankClassifierTests.cs): 境界値分類 15 件 + 特定メッセージ検証 9 件 + 36 組合せ網羅 1 件 + GetMessageForScore 合成 4 件 = 計 29 件
+  - [LuckyItemSelectorTests.cs](Birthdate-Constella-Divination.Tests/Fortune/LuckyItemSelectorTests.cs): Select(int) マッピング 10 件 + Select(int) out-of-range 4 件 + Select(Random) 決定論 1 件 + 1000 回ランダムでも valid item 1 件 + null rng 1 件 + GetName 4 件 + GetName 不正値 1 件 = 計 22 件
+- CLAUDE.md §4.1 (ファイル表に 5 新ファイル追加)、§8 (現フェーズ表示)、§9/§10 (履歴) 更新、γ-1 ハッシュ `e232f5a` 補填
+- 検証: `dotnet test` で **70/70 合格** (γ-0 sanity 2 + γ-1 ロジック 17 + γ-2 新規 51)、所要 119 ms。.slnx 経由 MSBuild で両プロジェクト警告 0
+- 関連コミット: (未コミット)
 
 ### 2026-06-28 (フェーズ γ-1: FortuneCalculator 抽出とマジック定数集約)
 - 新フォルダ [Birthdate-Constella-Divination/Fortune/](Birthdate-Constella-Divination/Fortune/) を作成 (`BirthdateConstellaDivination.Fortune` 名前空間)

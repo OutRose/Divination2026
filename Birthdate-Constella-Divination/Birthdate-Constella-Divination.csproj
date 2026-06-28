@@ -62,6 +62,11 @@
     <Compile Include="Fortune\Fortune.cs" />
     <Compile Include="Fortune\FortuneCalculator.cs" />
     <Compile Include="Fortune\FortuneConstants.cs" />
+    <Compile Include="Fortune\LuckCategory.cs" />
+    <Compile Include="Fortune\LuckRank.cs" />
+    <Compile Include="Fortune\LuckRankClassifier.cs" />
+    <Compile Include="Fortune\LuckyItem.cs" />
+    <Compile Include="Fortune\LuckyItemSelector.cs" />
     <Compile Include="Polyfills\IsExternalInit.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
