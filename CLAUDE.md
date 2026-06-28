@@ -295,7 +295,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | **α (アルファ)** | 現状把握と土台整備 | CLAUDE.md 作成、エンコーディング統一方針確定、`LangVersion` 7.3/8.0 の判断、`.gitignore`/`.gitattributes`/`.editorconfig` 検討 |
 | **β (ベータ)** | 構造的クリーンアップ | クラス/ファイル名の整合 (`Form1` → `FirstWindow.cs` 等)、Designer 以外の手書きコードの責務整理、不要ファイル削除 (古い `.snk`, 一時 `.pfx`) |
 | **γ (ガンマ)** | 内部品質向上 | `Result.cs` (290 行) の責務分割、運勢計算ロジックの抽出 (UI から分離)、Magic Number の名前付き定数化、エラーハンドリング整備 |
-| **δ (デルタ)** | モダン化 | nullable reference types 有効化検討、`async` 化が意味を持つ部分の見直し、テスト追加 (現状テスト 0)、ClickOnce 設定の整理 |
+| **δ (デルタ)** | モダン化 (現状保留) | 主要候補は γ で先取り達成済み (NRT 有効化、テスト追加)。残る候補は `async` 化 (本プロジェクトは適用箇所なし)、ClickOnce 再設定 (β-1 で撤去済み、必要時のみ)、i18n リソース化、Life スコア設計の根本見直し (付録 A 項目 11) など。**本リポジトリ規模では実施意義が薄いため未着手** |
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
@@ -594,6 +594,12 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 7. ~~**古い `BootstrapperPackage` 参照**~~ → **2026-06-28 解決**: フェーズ α-1 で csproj から ItemGroup 全体を除去
 8. ~~**`ManifestCertificateThumbprint`** が csproj に残存~~ → **2026-06-28 解決**: フェーズ β-1 で `ManifestCertificateThumbprint` を含む ClickOnce/署名マニフェスト関連 5 項目 (`ManifestCertificateThumbprint` / `ManifestKeyFile` / `GenerateManifests` / `SignManifests` / `TargetZone`) を csproj から完全除去。これにより `MSB3327` 警告も解消
 9. ~~**既存ファイルの改行コード混在**~~ → **2026-06-28 解決**: フェーズ α-4 で `git add --renormalize .` を実行し全面 canonical 化。実体は変わらず、blob と attributes が完全整合した状態
+
+### γ 終結時点で意図的に残した課題 (δ 候補または永続的妥協)
+
+10. **[Result.cs](Birthdate-Constella-Divination/Result.cs) のパラメータレスコンストラクタ廃止による VS デザイナ design view 不可**: フェーズ γ-3 で `public Result()` を削除し `Result(DateTime, string)` 一本化したため、Visual Studio で Result フォームをデザイナ表示できない。フォームレイアウトは固定で実用上の影響は軽微。再設計が必要になった場合は parameterless ctor を一時復活させて作業 → 完了後に再撤去する運用を想定 (CLAUDE.md §10 γ-3 履歴参照)
+11. **Life スコアが `ProgressBar.Maximum=27` を超えうる設計矛盾**: [FortuneCalculator](Birthdate-Constella-Divination/Fortune/FortuneCalculator.cs) の Life スコアは理論最大 `9×3×6=162` (digits[5] × rdkey × lfadj)。元実装の Designer は `Maximum=27` のため γ-3 で `Math.Min(score, progress.Maximum)` キャップを入れて `ArgumentOutOfRangeException` を防止したが、**スコアリング設計そのものの是非は未解決**。ランクメッセージ側は `LuckRankClassifier` の `_ => Highest` で 27 超を graceful 扱いするので破綻はしないが、δ で「Maximum を 162 に拡大」または「スコア計算式を 27 上限に再設計」のどちらかを判断する余地あり (CLAUDE.md §10 γ-3 履歴、Result.cs:39-43、FortuneCalculator.cs:37-39 参照)
+12. **[FortuneCalculator](Birthdate-Constella-Divination/Fortune/FortuneCalculator.cs) の `pattern > MaxScore` dead branch**: 元コード `if (pattern > 27) pattern /= lfadj;` を γ-1 で挙動完全保存のため残置。pattern の理論最大は `9×3=27` で `> 27` 分岐は到達不能。元コードの意図は Life の > 27 キャップだった可能性が高いが、γ では「元実装の挙動保存」を優先して dead branch のまま温存 (項目 11 と関連)。δ で項目 11 を再設計するなら同時に整理可能
 
 ## 付録 B: ビルド再現手順 (MSBuild パスの自動検出)
 
