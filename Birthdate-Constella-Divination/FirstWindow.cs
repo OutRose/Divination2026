@@ -21,7 +21,6 @@ namespace BirthdateConstellaDivination
             else
             {
                 birthOk = true;
-                Result.birtheight = inputBirth.Text;
             }
 
             bool nameOk;
@@ -33,12 +32,11 @@ namespace BirthdateConstellaDivination
             else
             {
                 nameOk = true;
-                Result.strusrname = inputName.Text;
             }
 
-            if (birthOk == true && nameOk == true)
+            if (birthOk && nameOk)
             {
-                using Result f2 = new Result();
+                using Result f2 = new Result(inputBirth.Text, inputName.Text);
                 _ = f2.ShowDialog(this);
             }
         }

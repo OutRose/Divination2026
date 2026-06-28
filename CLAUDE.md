@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ γ-2 完了反映)
+最終更新: 2026-06-28 (フェーズ γ-3 完了反映)
 
 ---
 
@@ -11,7 +11,7 @@
 - **正体**: 8 年前（2018 年）の卒業制作的位置づけで作られた、誕生日・名前から運勢を占う Windows Forms アプリ「電脳祭2018 (DenNoSai2018) 」プロジェクトの**複製版**。オリジナルは `OutRose/Divination2018` 系統リポジトリ。
 - **本リポジトリの目的**: 当時のコード資産を題材に、**学習目的で段階的にリファクタリングを行う**こと。プロダクト機能を増やすことが主目的ではない。
 - **メインアプリ**: `Birthdate-Constella-Divination.exe` (Windows Forms, .NET Framework 4.8)。`FirstWindow` (入力フォーム) と `Result` (結果表示フォーム) の 2 画面構成。健康・金運・学業・恋愛・仕事・対人の 6 指標で運勢を算出し、ラッキーアイテムを提示する。
-- **本リポジトリの実体規模** (β 完了時点): 手書きコード 約 397 行、Designer 自動生成 約 604 行、resx 約 354 行、csproj 115 行。詳細は §4 を参照。
+- **本リポジトリの実体規模** (γ-3 時点): 手書きコード 約 401 行 (うち Fortune 配下に 7 ファイル約 215 行、Result.cs は 290→50 行に圧縮)、Designer 自動生成 約 604 行、resx 約 354 行、csproj 120 行、テスト約 380 行 (70 件)。詳細は §4 を参照。
 - **CLI/サーバ要素なし**: 純粋な WinForms クライアント。外部ネットワーク・DB アクセスなし。
 - **国際化**: 日本語固定 (UI 文字列、コメント、アセンブリ属性すべて日本語) 。多言語化の予定はない。
 
@@ -95,10 +95,10 @@ WinForms 占いアプリ本体。実体のあるコード。
 | ファイル | 行数 | 種別 |
 |---|---:|---|
 | [Program.cs](Birthdate-Constella-Divination/Program.cs) | 19 | エントリポイント |
-| [FirstWindow.cs](Birthdate-Constella-Divination/FirstWindow.cs) | 51 | 入力画面ロジック (旧 Form1.cs、β-0 でリネーム) |
+| [FirstWindow.cs](Birthdate-Constella-Divination/FirstWindow.cs) | 48 | 入力画面ロジック (β-0 で Form1.cs から rename、γ-3 で Result.birtheight/strusrname 静的フィールド代入を除去し `new Result(birth, name)` 引数渡しに変更) |
 | [FirstWindow.Designer.cs](Birthdate-Constella-Divination/FirstWindow.Designer.cs) | 167 | 自動生成 |
 | [FirstWindow.resx](Birthdate-Constella-Divination/FirstWindow.resx) | 119 | リソース (旧 Form1.resx、β-0 でリネーム) |
-| [Result.cs](Birthdate-Constella-Divination/Result.cs) | 290 | 結果計算・表示ロジック (γ-3 で薄 UI 層に refactor 予定) |
+| [Result.cs](Birthdate-Constella-Divination/Result.cs) | 50 | 結果画面の**薄 UI 配線層** (γ-3 で 290→50 行に圧縮)。コンストラクタ `Result(string birthdateText, string userName)` で FortuneCalculator / LuckyItemSelector / LuckRankClassifier を呼ぶだけ |
 | [Fortune/FortuneConstants.cs](Birthdate-Constella-Divination/Fortune/FortuneConstants.cs) | 36 | マジック定数 23 項目を集約 (γ-1 新設) |
 | [Fortune/Fortune.cs](Birthdate-Constella-Divination/Fortune/Fortune.cs) | 16 | 6 スコアを束ねる record (γ-1 新設、`MaxScoreCount`/`IsSuperLucky` を提供) |
 | [Fortune/FortuneCalculator.cs](Birthdate-Constella-Divination/Fortune/FortuneCalculator.cs) | 70 | 純粋計算 (誕生日差→6桁抽出→スコア算出→ゼロ補正) (γ-1 新設、`Calculate(int birthdate, DateTime today, Random rng)`) |
@@ -289,7 +289,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: γ 進行中 (γ-0, γ-1, γ-2 完了)。残りサブフェーズ: γ-3 (Result.cs 薄 UI 化 + 静的フィールド除去)、γ-4 (BirthdateParser 入力検証)、γ-5 (NRT 有効化、γ 終結)。
+**現フェーズ**: γ 進行中 (γ-0, γ-1, γ-2, γ-3 完了)。残りサブフェーズ: γ-4 (BirthdateParser 入力検証)、γ-5 (NRT 有効化、γ 終結)。
 
 ---
 
@@ -315,7 +315,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | フェーズ β-2: [BuildProcessTemplates/](https://github.com/OutRose/Divination2026) (TFS 11 系 XAML テンプレート 4 件、計 1,508 行、完全未参照確認済み) を `git rm -r` でディレクトリごと削除。CLAUDE.md §1/§4/§8/§9/§10、付録 A 項目 5 更新 (項目 5 解消)。**フェーズ β 完了** | `05efb8c` |
 | 2026-06-28 | フェーズ γ-0: [Birthdate-Constella-Divination.Tests/](Birthdate-Constella-Divination.Tests/) を SDK-style + xUnit 2.6.6 + Microsoft.NET.Test.Sdk 17.8.0 で新設、.slnx にプロジェクト追加、SanityTests.cs に 2 件のスモークテスト (両方合格)、.gitignore に `[Tt]est[Rr]esults/` 追加、CLAUDE.md §3/§4/§8/§9/§10 更新 | `a2445ca` |
 | 2026-06-28 | フェーズ γ-1: [Fortune/](Birthdate-Constella-Divination/Fortune/) フォルダ新設 (`BirthdateConstellaDivination.Fortune` 名前空間)、`FortuneConstants` (23 定数)、`Fortune` (record 型 6 スコア)、`FortuneCalculator` (純粋計算 + ゼロ補正) を抽出。テスト 17 件追加 (`FortuneTests` 10 件 + `FortuneCalculatorTests` 7 件)、全 19/19 合格 | `e232f5a` |
-| 2026-06-28 | フェーズ γ-2: 5 新型を Fortune/ に追加 (`LuckCategory`/`LuckRank` enum、`LuckRankClassifier` (`switch` 式 + 36 メッセージ dict)、`LuckyItem` enum、`LuckyItemSelector`)。テスト 51 件追加、全 70/70 合格 | (本作業) |
+| 2026-06-28 | フェーズ γ-2: 5 新型を Fortune/ に追加 (`LuckCategory`/`LuckRank` enum、`LuckRankClassifier` (`switch` 式 + 36 メッセージ dict)、`LuckyItem` enum、`LuckyItemSelector`)。テスト 51 件追加、全 70/70 合格 | `c3c183c` |
+| 2026-06-28 | フェーズ γ-3: [Result.cs](Birthdate-Constella-Divination/Result.cs) を 290 行 → 50 行に圧縮 (薄 UI 配線層化)。`Result.birtheight`/`strusrname` 静的フィールド廃止、コンストラクタ引数化 (`Result(string birth, string name)`)。FortuneCalculator + LuckRankClassifier + LuckyItemSelector を呼び出す `AssignScore` ヘルパで 6 指標を一様処理。Life>27 を `Math.Min(score, progress.Maximum)` でキャップし元実装の潜在 `ArgumentOutOfRangeException` バグも解消。70/70 テスト維持 | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -409,6 +410,29 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - 付録 A 項目 5 (`BuildProcessTemplates/` の扱い) を解決済みに
 - ビルド検証: Debug|AnyCPU で**エラー 0、警告 0** で成功 (コード/csproj に影響なし)
 - 関連コミット: `05efb8c`
+
+### 2026-06-28 (フェーズ γ-3: Result.cs を薄 UI 層に再構成、静的フィールド除去)
+- [Result.cs](Birthdate-Constella-Divination/Result.cs) を全面書き換え:
+  - 290 行 → **50 行** (約 83% 削減、-272/+30 差分)
+  - **静的フィールド廃止**: `public static string birtheight;` / `public static string strusrname;` を削除
+  - **コンストラクタ引数化**: `public Result(string birthdateText, string userName)` でコンストラクタ注入
+  - **パラメータレスコンストラクタ廃止**: `public Result()` 削除 (注: VS デザイナの Result 設計ビューが動かなくなるが、フォームレイアウトは既に固定なので影響軽微。再設計必要時は parameterless ctor を一時復活させる)
+  - **AssignScore ヘルパ** で 6 指標を一様処理 (`ProgressBar.Value` 設定 + ランクメッセージ取得)
+  - **Life>27 のキャップ追加**: `progress.Value = Math.Min(score, progress.Maximum)` で元実装の潜在バグ (`ArgumentOutOfRangeException` 可能性) を解消
+  - 既存挙動の forward 保持: `int.Parse` のエラーは引き続き例外 (γ-4 で `TryParse` に切り替え)、Random は内部で `new Random()` 生成 (UI 配線層のため depend injection は不要と判断)
+- [FirstWindow.cs](Birthdate-Constella-Divination/FirstWindow.cs) を最小変更:
+  - 51 行 → **48 行** (-3 行)
+  - `Result.birtheight = inputBirth.Text;` / `Result.strusrname = inputName.Text;` の 2 行を削除
+  - `new Result()` → `new Result(inputBirth.Text, inputName.Text)` 引数渡しに変更
+  - `birthOk == true && nameOk == true` → `birthOk && nameOk` (微小簡素化)
+  - 注: 2 つの empty チェック構造はそのまま (γ-4 で BirthdateParser に統一予定)
+- 中間表ファイル (Designer.cs / resx) は無変更 — UI 配置は元のまま
+- CLAUDE.md §1 (実体規模)、§4.1 (Result.cs / FirstWindow.cs 備考)、§8 (現フェーズ表示)、§9/§10 (履歴) 更新、γ-2 ハッシュ `c3c183c` 補填
+- 検証:
+  - `dotnet test`: **70/70 維持** (202 ms、refactor によりテスト失敗ゼロ — γ-1/γ-2 の純粋ロジックテストが Result.cs 内部処理と等価なため、振る舞いの degradation がないことを確認)
+  - .slnx 経由 MSBuild: 両プロジェクト警告 0
+  - **実機 smoke test 必須** (ユーザ手動): bin/Debug/Birthdate-Constella-Divination.exe を起動して FirstWindow → Result の遷移を確認
+- 関連コミット: (未コミット)
 
 ### 2026-06-28 (フェーズ γ-2: LuckRank / LuckyItem 抽出と 36 メッセージ集約)
 - Fortune/ に新規ファイル 5 件:
