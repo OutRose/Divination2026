@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ β-1 完了反映)
+最終更新: 2026-06-28 (フェーズ β-2 完了反映 — フェーズ β 完全終了)
 
 ---
 
@@ -11,7 +11,7 @@
 - **正体**: 8 年前（2018 年）の卒業制作的位置づけで作られた、誕生日・名前から運勢を占う Windows Forms アプリ「電脳祭2018 (DenNoSai2018) 」プロジェクトの**複製版**。オリジナルは `OutRose/Divination2018` 系統リポジトリ。
 - **本リポジトリの目的**: 当時のコード資産を題材に、**学習目的で段階的にリファクタリングを行う**こと。プロダクト機能を増やすことが主目的ではない。
 - **メインアプリ**: `Birthdate-Constella-Divination.exe` (Windows Forms, .NET Framework 4.8)。`FirstWindow` (入力フォーム) と `Result` (結果表示フォーム) の 2 画面構成。健康・金運・学業・恋愛・仕事・対人の 6 指標で運勢を算出し、ラッキーアイテムを提示する。
-- **本リポジトリの実体規模**: 手書きコード 約 397 行、Designer 自動生成 約 604 行、resx 約 354 行、csproj 175 行。詳細は §4 を参照。
+- **本リポジトリの実体規模** (β 完了時点): 手書きコード 約 397 行、Designer 自動生成 約 604 行、resx 約 354 行、csproj 115 行。詳細は §4 を参照。
 - **CLI/サーバ要素なし**: 純粋な WinForms クライアント。外部ネットワーク・DB アクセスなし。
 - **国際化**: 日本語固定 (UI 文字列、コメント、アセンブリ属性すべて日本語) 。多言語化の予定はない。
 
@@ -75,7 +75,7 @@
 
 ## 4. プロジェクト構造
 
-リポジトリには**論理的に 3 つ**のサブ単位が想定されていますが、現実には **2 つ**しか存在しません。
+β-2 完了時点で、コードを含むサブディレクトリは **[Birthdate-Constella-Divination/](Birthdate-Constella-Divination/) のみ**。歴史的に想定されていた他のサブ単位 (`BuildProcessTemplates/`、`DenNoSai2018Project`) はすでにリポジトリから消えている (§4.2 / §4.3 参照)。
 
 ### 4.1 [Birthdate-Constella-Divination/](Birthdate-Constella-Divination/) — メインアプリ (現役)
 
@@ -96,7 +96,7 @@ WinForms 占いアプリ本体。実体のあるコード。
 | [Properties/Settings.Designer.cs](Birthdate-Constella-Divination/Properties/Settings.Designer.cs) | 27 | 自動生成 |
 | [Properties/Settings.settings](Birthdate-Constella-Divination/Properties/Settings.settings) | 8 | 設定 |
 | [Properties/app.manifest](Birthdate-Constella-Divination/Properties/app.manifest) | — | UAC マニフェスト (3723 byte) |
-| [Birthdate-Constella-Divination.csproj](Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj) | 175 | プロジェクト定義 |
+| [Birthdate-Constella-Divination.csproj](Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj) | 115 | プロジェクト定義 (β-1 で死設定 31 項目除去により 161 → 115 に圧縮) |
 | [App.config](Birthdate-Constella-Divination/App.config) | 7 | アプリ構成 |
 | [packages.config](Birthdate-Constella-Divination/packages.config) | 2 | NuGet (現在空) |
 | [DNS2018-InternalPattern.txt](Birthdate-Constella-Divination/DNS2018-InternalPattern.txt) | — | 内部メモ (運用文書) |
@@ -104,17 +104,11 @@ WinForms 占いアプリ本体。実体のあるコード。
 
 C# ルート名前空間: `BirthdateConstellaDivination` (ハイフンなし) 。
 
-### 4.2 [BuildProcessTemplates/](BuildProcessTemplates/) — TFS XAML ビルドテンプレート (歴史的資料)
+### 4.2 BuildProcessTemplates/ — **削除済み (フェーズ β-2)**
 
-| ファイル | 行数 | 種別 |
-|---|---:|---|
-| [AzureContinuousDeployment.11.xaml](BuildProcessTemplates/AzureContinuousDeployment.11.xaml) | 686 | TFS 用 |
-| [DefaultTemplate.11.1.xaml](BuildProcessTemplates/DefaultTemplate.11.1.xaml) | 543 | TFS 用 |
-| [LabDefaultTemplate.11.xaml](BuildProcessTemplates/LabDefaultTemplate.11.xaml) | 203 | TFS 用 |
-| [UpgradeTemplate.xaml](BuildProcessTemplates/UpgradeTemplate.xaml) | 76 | TFS 用 |
-
-- 中身は Team Foundation Server 11 系のビルドプロセス XAML テンプレートのみ。`.csproj` も `.cs` もない。
-- **現在のビルドフローでは未使用**。歴史的・記念的に保持されている。リファクタリング対象外。
+- 元は Team Foundation Server 11 系のビルドプロセス XAML テンプレート 4 件 (計 1,508 行) を歴史資料として保持していた。
+- 現代のビルドフロー (ローカル MSBuild + git) からは完全に未参照と確認の上、β-2 で `git rm -r BuildProcessTemplates/` でディレクトリごと削除。
+- 必要になれば git 履歴 (`git log -- BuildProcessTemplates/`) から復元可能。
 
 ### 4.3 DenNoSai2018Project — **削除済み (存在しない)**
 
@@ -260,7 +254,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: β 進行中 (β-0, β-1 完了)。残りは β-2 (BuildProcessTemplates/ 削除)。
+**現フェーズ**: β 完了 (β-0, β-1, β-2)。次はフェーズ γ (内部品質向上 — `Result.cs` 290 行の責務分割、運勢計算ロジックの UI 分離、`record` 化、Magic Number の名前付き定数化、エラーハンドリング、テスト追加)。
 
 ---
 
@@ -282,7 +276,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | フェーズ α-3: [.editorconfig](.editorconfig) 最小版を新設 (encoding / EOL / indent / Allman ブレース)、csproj 既存 `<None Include=".editorconfig" />` の死参照を実体化、CLAUDE.md §10/付録 A 更新 | `4d8a6a6` |
 | 2026-06-28 | フェーズ α-4: `git add --renormalize .` で 19 ファイルの EOL を `.gitattributes` 規則どおりに blob 正規化、α-2 で見逃していた `*.csproj.vspscc` を untrack、CLAUDE.md §8/§10/付録 A 更新 (フェーズ α 完了) | `d78b985` |
 | 2026-06-28 | フェーズ β-0: `Form1.cs`/`.Designer.cs`/`.resx` を `FirstWindow.*` に `git mv` でリネーム (履歴保持)、csproj の `<Compile>`/`<EmbeddedResource>`/`<DependentUpon>` 5 箇所更新、Designer の `this.Name = "firstWindow"` を `"FirstWindow"` に修正、CLAUDE.md §4/§5/§8/§9/§10 更新 | `5b6bc1f` |
-| 2026-06-28 | フェーズ β-1: csproj 死設定 31 項目を一括除去 (旧 Scc バインディング×4、ClickOnce 23 項目、`ManifestCertificateThumbprint`/`CodeAnalysisRuleSet`/`ToolsVersion`/`NuGetPackageImportStamp`/`TargetFrameworkProfile`/`ManifestKeyFile`)。細分化された PropertyGroup を統合し 161 行 → 115 行に圧縮。**`MSB3327` 警告が解消**し α 以降初の警告 0 ビルド達成 | (本作業) |
+| 2026-06-28 | フェーズ β-1: csproj 死設定 31 項目を一括除去 (旧 Scc バインディング×4、ClickOnce 23 項目、`ManifestCertificateThumbprint`/`CodeAnalysisRuleSet`/`ToolsVersion`/`NuGetPackageImportStamp`/`TargetFrameworkProfile`/`ManifestKeyFile`)。細分化された PropertyGroup を統合し 161 行 → 115 行に圧縮。**`MSB3327` 警告が解消**し α 以降初の警告 0 ビルド達成 | `32c1151` |
+| 2026-06-28 | フェーズ β-2: [BuildProcessTemplates/](https://github.com/OutRose/Divination2026) (TFS 11 系 XAML テンプレート 4 件、計 1,508 行、完全未参照確認済み) を `git rm -r` でディレクトリごと削除。CLAUDE.md §1/§4/§8/§9/§10、付録 A 項目 5 更新 (項目 5 解消)。**フェーズ β 完了** | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -365,7 +360,21 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 - CLAUDE.md §3 (ビルド環境表、警告 0 反映)、§3 注意点 (`MSB3327` 解消マーク)、§8 (現フェーズ表示)、§9/§10 (履歴) 更新
 - 付録 A 項目 8 (`ManifestCertificateThumbprint`) を解決済みに
 - ビルド検証: Debug|AnyCPU で**エラー 0、警告 0** で成功
+- 関連コミット: `32c1151`
+
+### 2026-06-28 (フェーズ β-2: BuildProcessTemplates/ 完全削除、β 全体終結)
+- `git rm -r BuildProcessTemplates/` で TFS 11 系 XAML テンプレート 4 件 + ディレクトリ自体を削除
+  - 削除ファイル: `AzureContinuousDeployment.11.xaml` (686 行) / `DefaultTemplate.11.1.xaml` (543 行) / `LabDefaultTemplate.11.xaml` (203 行) / `UpgradeTemplate.xaml` (76 行)、計 1,508 行
+  - 完全に未参照 (csproj/.slnx/コード/README から一切参照なし、β プラン Phase 1 の Explore 調査で確認済み) のため、リファクタリング対象から除外して削除
+  - 必要になれば git 履歴 (`git log -- BuildProcessTemplates/`) から復元可能
+- CLAUDE.md §1 (実体規模、csproj 175 → 115 反映)、§4 (前文を「コード含むサブディレクトリは Birthdate-Constella-Divination/ のみ」に書き換え、§4.2 を「削除済み」節に縮約)、§8 (現フェーズ表示: β 完了 → γ へ)、§9/§10 (履歴) 更新
+- 付録 A 項目 5 (`BuildProcessTemplates/` の扱い) を解決済みに
+- ビルド検証: Debug|AnyCPU で**エラー 0、警告 0** で成功 (コード/csproj に影響なし)
 - 関連コミット: (未コミット)
+
+---
+
+**フェーズ β 終了サマリ**: β-0 〜 β-2 で構造的クリーンアップが完了。クラス/ファイル名の不整合解消 (Form1 → FirstWindow)、csproj の死設定 31 項目除去、未使用ディレクトリ削除を達成。ビルドは警告 0 で安定。残課題はフェーズ γ (内部品質向上: `Result.cs` 290 行の責務分割、運勢計算ロジックの UI 分離、`record` 化、Magic Number の名前付き定数化、エラーハンドリング、テスト追加) のみ。
 
 ---
 
@@ -387,7 +396,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 2. ~~**`.gitattributes` / `.editorconfig` の導入可否**~~ → **2026-06-28 解決**: `.gitattributes` をフェーズ α-1 で導入 (code=CRLF / md=LF / binary 多数)。`.editorconfig` 最小版をフェーズ α-3 で導入し、csproj の死参照を実体化
 3. ~~**`bin/` / `obj/` のリポジトリ追跡**~~ → **2026-06-28 解決**: フェーズ α-2 で [.gitignore](.gitignore) 導入と 25 件の `git rm --cached` untrack を実施。以後、ビルド成果物・`.vs/`・`*.user`・`.claude/` 等は `git status` に現れない
 4. ~~**古いキーファイルの扱い**~~ → **2026-06-28 解決**: フェーズ α-1 で Key-First/Second snk と一時 pfx を直接削除 (アーカイブブランチ退避は行わなかった)
-5. **`BuildProcessTemplates/`** の扱い: 未使用 XAML 群を残すか削除するか — フェーズ β
+5. ~~**`BuildProcessTemplates/`** の扱い~~ → **2026-06-28 解決**: フェーズ β-2 で `git rm -r` でディレクトリごと完全削除。git 履歴には残るので必要時は `git log -- BuildProcessTemplates/` で参照可能
 6. **テスト不在**: 単体テストが 1 つもない。安全なリファクタリングのためにフェーズ γ で `Result.cs` の運勢計算ロジックを抽出した上でテスト追加を検討
 7. ~~**古い `BootstrapperPackage` 参照**~~ → **2026-06-28 解決**: フェーズ α-1 で csproj から ItemGroup 全体を除去
 8. ~~**`ManifestCertificateThumbprint`** が csproj に残存~~ → **2026-06-28 解決**: フェーズ β-1 で `ManifestCertificateThumbprint` を含む ClickOnce/署名マニフェスト関連 5 項目 (`ManifestCertificateThumbprint` / `ManifestKeyFile` / `GenerateManifests` / `SignManifests` / `TargetZone`) を csproj から完全除去。これにより `MSB3327` 警告も解消
