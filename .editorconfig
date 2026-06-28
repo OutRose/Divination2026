@@ -1,0 +1,47 @@
+# Divination2026 — .editorconfig (phase α-3, minimal)
+# Mechanizes the encoding / EOL / whitespace policy from CLAUDE.md §2
+# and the brace style from CLAUDE.md §6.
+# Pairs with .gitattributes (git layer) for double-coverage.
+# Naming rules / diagnostics / var-style preferences will be expanded
+# as phase β/γ stabilizes — kept out of this minimal version on purpose.
+
+root = true
+
+# ============================================================
+# Defaults — all files
+# ============================================================
+[*]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+end_of_line = crlf
+
+# ============================================================
+# Per-type overrides
+# ============================================================
+
+# Documentation — UTF-8 no-BOM + LF (Markdown convention)
+[*.{md,txt}]
+charset = utf-8
+end_of_line = lf
+
+# Tooling dotfiles themselves — LF
+[{.gitattributes,.gitignore}]
+end_of_line = lf
+
+# C# source — UTF-8 BOM + Allman brace style (matches Visual Studio default and CLAUDE.md §6)
+[*.cs]
+charset = utf-8-bom
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+
+# MSBuild / config / resource / build files — UTF-8 BOM + 2-space indent (XML 慣例)
+[*.{csproj,sln,slnx,config,resx,settings,manifest,xaml,props,targets,ruleset}]
+charset = utf-8-bom
+indent_size = 2

@@ -2,7 +2,7 @@
 
 このファイルは、Claude Code が本リポジトリで作業する際に参照する基礎情報・規約・方針を集約したものです。本文の方針と現状が乖離した場合は、まずこの CLAUDE.md を更新してから作業を開始してください。
 
-最終更新: 2026-06-28 (フェーズ α-2 完了反映)
+最終更新: 2026-06-28 (フェーズ α-3 完了反映)
 
 ---
 
@@ -260,7 +260,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 
 各フェーズは独立ブランチ (`refact-{YYMMDD}-{phase}`) で行い、フェーズ完了時に main へマージ。次フェーズはマージ後の main から再分岐する。
 
-**現フェーズ**: α (本 CLAUDE.md 作成が α の初手) 。
+**現フェーズ**: α (α-0 〜 α-3 まで完了。残作業は付録 A の項目 5/6/8/9 のうち α 範囲のもの、またはフェーズ β への移行) 。
 
 ---
 
@@ -278,7 +278,8 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 | 2026-06-28 | CLAUDE.md 初版作成、ブランチ `refact-260628-alpha` を切る | (フェーズ α 初手) |
 | 2026-06-28 | フェーズ α-0: `LangVersion` を `8.0` → `latest` (C# 12.0) に変更、[Polyfills/IsExternalInit.cs](Birthdate-Constella-Divination/Polyfills/IsExternalInit.cs) を新設 (record 型 / init 専用プロパティ対応)、CLAUDE.md §3/§6 更新 | `7ef8a2a` |
 | 2026-06-28 | フェーズ α-1: 3 XML 設定に UTF-8 BOM 追加、[.gitattributes](.gitattributes) 導入 (code=CRLF / md=LF)、旧署名資産削除 (Key-First/Second snk + 一時 pfx)、csproj から BootstrapperPackage と死参照を除去、CLAUDE.md §2/§4/§9/§10/付録 A 更新 | `751f27a` |
-| 2026-06-28 | フェーズ α-2: [.gitignore](.gitignore) 新設、追跡済みビルド成果物 25 件 (bin/×3 + obj/×14 + .vs/×8 [root と csproj 配下のネスト両方] + csproj.user×1) を `git rm --cached` で untrack、CLAUDE.md §10/付録 A 更新 | (本作業) |
+| 2026-06-28 | フェーズ α-2: [.gitignore](.gitignore) 新設、追跡済みビルド成果物 25 件 (bin/×3 + obj/×14 + .vs/×8 [root と csproj 配下のネスト両方] + csproj.user×1) を `git rm --cached` で untrack、CLAUDE.md §10/付録 A 更新 | `c23908a` |
+| 2026-06-28 | フェーズ α-3: [.editorconfig](.editorconfig) 最小版を新設 (encoding / EOL / indent / Allman ブレース)、csproj 既存 `<None Include=".editorconfig" />` の死参照を実体化、CLAUDE.md §10/付録 A 更新 | (本作業) |
 
 以後、機能差分・設定差分が出るたびにここに追記する。
 
@@ -313,7 +314,23 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
   - `Birthdate-Constella-Divination/bin/Debug/` 3 件 (`.exe`, `.exe.config`, `.pdb`)
   - `Birthdate-Constella-Divination/obj/Debug/` 14 件 (`.NETFramework,Version=v4.8.AssemblyAttributes.cs`, 各種 `.cache`, 3 種の `.resources`, `TempPE/Properties.Resources.Designer.cs.dll`, exe/pdb の中間版 等)
 - CLAUDE.md §10 (履歴)、付録 A 項目 3 (`bin`/`obj` 追跡: 解消) を更新
-- ビルド検証: 後述
+- ビルド検証: Debug|AnyCPU でエラー 0、警告 1 (`MSB3327` のみ) で成功。再ビルド後の `git status` がクリーンであることも確認
+- 関連コミット: `c23908a`
+
+### 2026-06-28 (フェーズ α-3: .editorconfig 最小版導入)
+- [.editorconfig](.editorconfig) をリポジトリルートに新設 (約 35 行)。範囲を以下に限定:
+  - 全ファイル既定: indent 4 スペース、UTF-8、CRLF、末尾改行、末尾空白除去
+  - `[*.{md,txt}]`: UTF-8 (BOM なし) + LF
+  - `[{.gitattributes,.gitignore}]`: LF
+  - `[*.cs]`: UTF-8 BOM + Allman ブレース ( `csharp_new_line_before_*` 系一式)
+  - `[*.{csproj,sln,slnx,config,resx,settings,manifest,xaml,props,targets,ruleset}]`: UTF-8 BOM + indent 2 スペース (XML 慣例)
+- **意図的に含めなかったもの** (β/γ で必要になった時点で追加):
+  - 命名規約 (`dotnet_naming_*`) — 既存コードへの警告ノイズを避けるため
+  - `var` / null / コレクション式等の style preferences (`csharp_style_*`, `dotnet_style_*`)
+  - Roslyn 診断ルールの severity 昇格 (`dotnet_diagnostic.*.severity`)
+- csproj に既存していた `<None Include=".editorconfig" />` 参照が、実体ファイルの追加により**整合**した (削除ではなく実体化を選択)
+- CLAUDE.md §10 (履歴)、付録 A 項目 2 (`.editorconfig` 整合: 解消) を更新
+- ビルド検証: Debug|AnyCPU でエラー 0、警告 1 (`MSB3327` のみ、`.editorconfig` 起因の新規警告なし) で成功
 - 関連コミット: (未コミット)
 
 ### テンプレート
@@ -329,7 +346,7 @@ csproj 宣言: `<LangVersion>latest</LangVersion>` (Debug / Release 両構成)
 ## 付録 A: 既知の課題・要決定事項
 
 1. ~~**C# LangVersion**: 7.3 にダウングレードするか、8.0 を維持するか~~ → **2026-06-28 解決**: `latest` (C# 12.0) + Polyfill 戦略を採用 (フェーズ α-0)
-2. ~~**`.gitattributes` / `.editorconfig` の導入可否**~~ → **2026-06-28 解決**: `.gitattributes` をフェーズ α-1 で導入 (code=CRLF / md=LF / binary 多数)。`.editorconfig` は csproj から `<None Include>` 参照のみ残るが実体未作成 → **フェーズ β で実体作成 or 参照削除**
+2. ~~**`.gitattributes` / `.editorconfig` の導入可否**~~ → **2026-06-28 解決**: `.gitattributes` をフェーズ α-1 で導入 (code=CRLF / md=LF / binary 多数)。`.editorconfig` 最小版をフェーズ α-3 で導入し、csproj の死参照を実体化
 3. ~~**`bin/` / `obj/` のリポジトリ追跡**~~ → **2026-06-28 解決**: フェーズ α-2 で [.gitignore](.gitignore) 導入と 25 件の `git rm --cached` untrack を実施。以後、ビルド成果物・`.vs/`・`*.user`・`.claude/` 等は `git status` に現れない
 4. ~~**古いキーファイルの扱い**~~ → **2026-06-28 解決**: フェーズ α-1 で Key-First/Second snk と一時 pfx を直接削除 (アーカイブブランチ退避は行わなかった)
 5. **`BuildProcessTemplates/`** の扱い: 未使用 XAML 群を残すか削除するか — フェーズ β
