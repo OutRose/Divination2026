@@ -1,3 +1,4 @@
 ﻿<Solution>
   <Project Path="Birthdate-Constella-Divination/Birthdate-Constella-Divination.csproj" Id="c6cf38bc-37b1-4f50-a0e3-43390851c741" />
+  <Project Path="Birthdate-Constella-Divination.Tests/Birthdate-Constella-Divination.Tests.csproj" Id="1f7fd37b-77cb-427d-a80d-8d3d6e87b98a" />
 </Solution>
