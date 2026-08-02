@@ -1,4 +1,4 @@
-# CLAUDE.md — Divination2026入口
+# AGENTS.md — Divination2026入口
 
 詳細規約のcanonical sourceは`PROJECT_GUIDE.md`である。全体を先読みせず、変更対象に応じて指定節だけを読む。
 
