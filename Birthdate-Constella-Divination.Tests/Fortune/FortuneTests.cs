@@ -1,4 +1,4 @@
-﻿using BirthdateConstellaDivination.Fortune;
+using BirthdateConstellaDivination.Fortune;
 using Xunit;
 
 namespace BirthdateConstellaDivination.Tests.Fortune;

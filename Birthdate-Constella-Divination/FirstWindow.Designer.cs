@@ -1,4 +1,4 @@
-﻿namespace BirthdateConstellaDivination
+namespace BirthdateConstellaDivination
 {
     partial class FirstWindow
     {

@@ -1,4 +1,4 @@
-﻿namespace BirthdateConstellaDivination.Fortune
+namespace BirthdateConstellaDivination.Fortune
 {
     public static class FortuneConstants
     {

@@ -1,4 +1,4 @@
-﻿namespace BirthdateConstellaDivination.Fortune
+namespace BirthdateConstellaDivination.Fortune
 {
     public enum LuckCategory
     {

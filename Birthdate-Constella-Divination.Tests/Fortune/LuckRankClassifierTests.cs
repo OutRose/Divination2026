@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BirthdateConstellaDivination.Fortune;
 using Xunit;
 

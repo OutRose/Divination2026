@@ -19,21 +19,18 @@
 
 ## 2. ファイルエンコーディング方針
 
-### 目標 (2026-06-28 確定)
+### 現行方針
 
 | カテゴリ | エンコーディング | 改行コード |
 |---|---|---|
-| コード関連 (.cs, .csproj, .sln, .config, .resx, .settings, .manifest, .xaml, .props, .targets, .ruleset, .editorconfig) | **UTF-8 BOM** | **CRLF** |
-| **.slnx** (例外) | **UTF-8 (BOM なし)** | **CRLF** |
-| ドキュメント (.md, .txt) | UTF-8 (BOM なし) | **LF** |
-| ツール設定 (`.gitattributes`, `.gitignore`) | UTF-8 (BOM なし) | **LF** |
+| コード・project・設定・ドキュメント・ツール設定 | **UTF-8 (BOM なし)** | **LF** |
 | バイナリ (.snk, .pfx, .exe, .dll, .pdb, .nupkg, 画像各種) | バイナリ扱い | 改行制御なし |
 
-上記方針は [.gitattributes](.gitattributes) で機械的に強制されます (フェーズ α-1 で導入済み)。
+上記方針は [.gitattributes](.gitattributes) と [.editorconfig](.editorconfig) で維持する。既存の日本語文書は文字を保持してUTF-8へ変換し、バイナリは変更しない。
 
-### 現状 (フェーズ α-1 完了時点)
+### 履歴 (フェーズ α-1 完了時点)
 
-すべてのソースおよび設定ファイルが上記方針に**準拠済み**。
+以下は当時のBOM/CRLF方針に関する記録であり、現行の保存規則ではない。
 
 - フェーズ α-1 で BOM を追加したファイル: [App.config](Birthdate-Constella-Divination/App.config), [packages.config](Birthdate-Constella-Divination/packages.config), [Birthdate-Constella-Divination.slnx](Birthdate-Constella-Divination.slnx) (※後者は γ-3 後の VS 18 Insiders アップグレード時に VS が BOM を剥がすため、no-BOM 例外として確定)
 - README.md は Markdown 慣例どおり BOM なし UTF-8 を維持。
@@ -41,9 +38,8 @@
 
 ### 運用ルール
 
-- 新規ファイル作成時、`.gitattributes` の規則に従って Visual Studio / Claude Code が適切な BOM・EOL で保存する。
-- BOM 付与は [PowerShell] [IO.File] API で先頭 3 バイト `EF BB BF` を直接書き込む方法が確実 (テキストエディタによっては BOM 付与オプションが分かりにくいため)。
-- ツール (Visual Studio / dotnet CLI / Roslyn) が BOM を勝手に剥がさないか、コミット前に `git diff` で警戒する。`.gitattributes` の `working-tree-encoding=UTF-8` 指定で Git レベルでは UTF-8 が維持される。
+- 新規・編集したコードと文書はBOMなしUTF-8/LFで保存する。エディタとGitの設定を上記2ファイルで一致させる。
+- コミット前に対象テキストのUTF-8 decode、BOM不在、CR不在を検査する。Designer等の生成コードも意味を変えず同じ形式で保持する。
 
 ---
 

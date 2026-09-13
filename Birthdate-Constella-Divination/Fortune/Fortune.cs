@@ -1,4 +1,4 @@
-﻿namespace BirthdateConstellaDivination.Fortune
+namespace BirthdateConstellaDivination.Fortune
 {
     public sealed record Fortune(int Life, int Gold, int Study, int Love, int Work, int Pattern)
     {

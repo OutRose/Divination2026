@@ -1,5 +1,5 @@
 # Divination2026 — .editorconfig (phase α-3, minimal)
-# Mechanizes the encoding / EOL / whitespace policy from CLAUDE.md §2
+# Mechanizes the UTF-8/LF / whitespace policy from PROJECT_GUIDE.md §2
 # and the brace style from CLAUDE.md §6.
 # Pairs with .gitattributes (git layer) for double-coverage.
 # Naming rules / diagnostics / var-style preferences will be expanded
@@ -16,7 +16,7 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 charset = utf-8
-end_of_line = crlf
+end_of_line = lf
 
 # ============================================================
 # Per-type overrides
@@ -31,9 +31,9 @@ end_of_line = lf
 [{.gitattributes,.gitignore}]
 end_of_line = lf
 
-# C# source — UTF-8 BOM + Allman brace style (matches Visual Studio default and CLAUDE.md §6)
+# C# source — UTF-8/LF + Allman brace style (matches PROJECT_GUIDE.md §6)
 [*.cs]
-charset = utf-8-bom
+charset = utf-8
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true
 csharp_new_line_before_catch = true
@@ -41,13 +41,12 @@ csharp_new_line_before_finally = true
 csharp_new_line_before_members_in_object_initializers = true
 csharp_new_line_before_members_in_anonymous_types = true
 
-# MSBuild / config / resource / build files — UTF-8 BOM + 2-space indent (XML 慣例)
+# MSBuild / config / resource / build files — UTF-8/LF + 2-space indent (XML 慣例)
 [*.{csproj,sln,config,resx,settings,manifest,xaml,props,targets,ruleset}]
-charset = utf-8-bom
+charset = utf-8
 indent_size = 2
 
-# .slnx は VS Insiders が保存時に BOM を強制的に剥がすため、no-BOM で扱う
-# (本リポジトリでも α-1 で一度 BOM を付けたが γ-3 後の VS アップグレードで削除された)
+# .slnx も他のproject fileと同じ UTF-8/LF で扱う
 [*.slnx]
 charset = utf-8
 indent_size = 2
