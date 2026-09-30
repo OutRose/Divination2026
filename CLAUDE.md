@@ -6,6 +6,7 @@
 
 - 学習目的の段階的refactoringであり、挙動保存と警告0を維持する。
 - code・project fileとMarkdownは`.gitattributes`どおりUTF-8（BOMなし）+ LFで保存する。
+- 常時参照する指示文書は必要最小限に保ち、詳細は必要時に読む文書へ移す。
 - generated Designer fileと未所有変更を不用意に書き換えず、秘密情報・build生成物をcommitしない。
 - `main`へ直接pushせず作業branchを使い、force push・履歴改変・branch削除はowner確認なしで行わない。
 
